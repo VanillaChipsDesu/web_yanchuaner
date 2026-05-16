@@ -56,7 +56,7 @@ export default function StudentsPage() {
           </p>
           <h1 className="font-heading mt-3 text-3xl font-bold text-[#4C1D95] md:text-4xl">在校生资源站</h1>
           <p className="mt-2 max-w-3xl text-sm leading-7 text-gray-700 md:text-base">
-            由毕业校友为学弟学妹们整理的学习资源、经验分享与成长指南。薪火相传，燕川精神代代延续。
+            由毕业校友为学弟学妹们整理的学习资源、经验分享与成长指南。薪火相传，燕中精神代代延续。
           </p>
         </header>
 
