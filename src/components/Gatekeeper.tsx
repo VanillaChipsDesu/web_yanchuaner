@@ -6,9 +6,10 @@ import {
   ShieldCheck,
   UserCog,
 } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { FormEvent, ReactNode, useEffect, useRef, useState } from "react";
 
-const ACCESS_KEY = "yc_access_token";
+const ACCESS_KEY = "yc_access_gate_status";
 const ACCESS_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 type AccessPayload = {
@@ -22,14 +23,11 @@ type GatekeeperProps = {
   initialIsVerified: boolean;
 };
 
-function setTokenCookie(serializedToken: string) {
-  document.cookie = `${ACCESS_KEY}=${encodeURIComponent(serializedToken)}; Max-Age=${Math.floor(ACCESS_TTL_MS / 1000)}; Path=/; SameSite=Lax`;
-}
-
 export default function Gatekeeper({
   children,
   initialIsVerified,
 }: GatekeeperProps) {
+  const pathname = usePathname();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [isVerified, setIsVerified] = useState(initialIsVerified);
   const [isChecked, setIsChecked] = useState(false);
@@ -103,7 +101,6 @@ export default function Gatekeeper({
       };
       const serialized = JSON.stringify(payload);
       window.localStorage.setItem(ACCESS_KEY, serialized);
-      setTokenCookie(serialized);
       setIsVerified(true);
       window.location.reload();
     } catch {
@@ -114,6 +111,10 @@ export default function Gatekeeper({
       setIsSubmitting(false);
     }
   };
+
+  if (pathname.startsWith("/admin")) {
+    return <>{children}</>;
+  }
 
   if (!isChecked) {
     return null;

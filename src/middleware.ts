@@ -45,7 +45,18 @@ async function verifyTokenEdge(
       diff |= sig.charCodeAt(i) ^ sigHex.charCodeAt(i);
     if (diff !== 0) return null;
 
-    const decoded = Buffer.from(b64, "base64").toString("utf-8");
+    // Edge compatible base64 decode
+    // base64 payload might be base64url encoded or standard base64
+    // Make sure we handle potential URI characters safely if needed
+    // The typical conversion works for standard base64 without padding
+    const decodedStr = atob(b64);
+    // Properly decode UTF-8 from the binary string atob provides
+    const bytes = new Uint8Array(decodedStr.length);
+    for (let i = 0; i < decodedStr.length; i++) {
+      bytes[i] = decodedStr.charCodeAt(i);
+    }
+    const decoded = new TextDecoder("utf-8").decode(bytes);
+    
     const payload = JSON.parse(decoded) as TokenPayload;
 
     if (

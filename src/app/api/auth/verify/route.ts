@@ -4,9 +4,11 @@ import { signToken } from "@/lib/verify-token";
 
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "";
 const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH || "";
-const ACCESS_PASSWORD = process.env.ACCESS_PASSWORD || "iloveyanchuan!";
-const ACCESS_HASH = createHash("sha256").update(ACCESS_PASSWORD).digest("hex");
+// 兼容旧的 ACCESS_PASSWORD 和更安全的 ACCESS_PASSWORD_HASH
+const ACCESS_PASSWORD = process.env.ACCESS_PASSWORD || "";
+const ACCESS_PASSWORD_HASH = process.env.ACCESS_PASSWORD_HASH || "";
 const ADMIN_CONFIGURED = !!(ADMIN_USERNAME && ADMIN_PASSWORD_HASH);
+const ACCESS_CONFIGURED = !!(ACCESS_PASSWORD || ACCESS_PASSWORD_HASH);
 const TOKEN_TTL_DAYS = 7;
 
 export async function POST(req: NextRequest) {
@@ -18,8 +20,8 @@ export async function POST(req: NextRequest) {
     if (body.username) {
       if (!ADMIN_CONFIGURED) {
         return NextResponse.json(
-          { error: "管理员账号未配置" },
-          { status: 500 },
+          { error: "账号或口令错误" },
+          { status: 401 },
         );
       }
       if (!body.password) {
@@ -57,12 +59,22 @@ export async function POST(req: NextRequest) {
     }
 
     // 普通口令模式：只需要 password
+    if (!ACCESS_CONFIGURED) {
+      return NextResponse.json(
+        { error: "口令错误，请查阅校友群公告" }, // 不泄露配置缺失
+        { status: 401 },
+      );
+    }
     const password = (body.password || "").trim();
     if (!password) {
       return NextResponse.json({ error: "请输入内测口令" }, { status: 400 });
     }
     const inputHash = createHash("sha256").update(password).digest("hex");
-    if (inputHash !== ACCESS_HASH && password !== ACCESS_PASSWORD) {
+    
+    const isValidHash = ACCESS_PASSWORD_HASH && inputHash === ACCESS_PASSWORD_HASH;
+    const isValidPlain = ACCESS_PASSWORD && password === ACCESS_PASSWORD;
+
+    if (!isValidHash && !isValidPlain) {
       return NextResponse.json(
         { error: "口令错误，请查阅校友群公告" },
         { status: 401 },

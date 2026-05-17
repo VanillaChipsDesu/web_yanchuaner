@@ -12,3 +12,4 @@ dev.db
 .opencode/
 
 /src/generated/prisma
+.claude/
