@@ -12,3 +12,17 @@ export function requireAdmin(req: NextRequest): Response | null {
   }
   return null;
 }
+
+/** Accepts both access (普通口令) and admin roles. For public-facing APIs
+ *  that should not be exposed to unauthenticated users. */
+export function requireAccessOrAdmin(req: NextRequest): Response | null {
+  const token = req.cookies.get("yc_access_token")?.value;
+  if (!token) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  const payload = verifyToken(token);
+  if (!payload || (payload.role !== "access" && payload.role !== "admin")) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  return null;
+}

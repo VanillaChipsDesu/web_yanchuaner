@@ -32,6 +32,27 @@ model WhitelistRoster {
   createdAt       DateTime @default(now())
 }
 
+model AlumniCorrectionRequest {
+  id                      String    @id @default(uuid())
+  rosterId                String
+  currentName             String?
+  currentGraduationClass  String?
+  currentTags             String?
+  requestedName           String?
+  requestedGraduationClass String?
+  requestedTags           String?
+  contact                 String
+  reason                  String
+  status                  String    @default("PENDING")
+  adminNote               String?
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+  reviewedAt              DateTime?
+
+  @@index([status])
+  @@index([rosterId])
+}
+
 model Post {
   id        String   @id @default(uuid())
   title     String

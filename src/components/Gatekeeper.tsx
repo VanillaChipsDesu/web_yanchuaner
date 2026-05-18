@@ -117,7 +117,18 @@ export default function Gatekeeper({
   }
 
   if (!isChecked) {
-    return null;
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#FAF5FF]">
+        <div className="text-center">
+          <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-[#7C3AED]/20 bg-white/60">
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#7C3AED] border-t-transparent" />
+          </div>
+          <p className="mt-4 text-sm text-[#4C1D95]/60">
+            正在进入燕中校友数字母港...
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (

@@ -20,7 +20,7 @@ function mask(n) {
 
 const starMsgs = alumni.map(d => ({
   name: mask(d.name),
-  message: d.message || "逐梦星辰，燕川常在"
+  message: d.message || "逐梦星辰，燕中常在"
 }));
 
 const starOutPath = path.join(__dirname, '../src/data/starMessages.ts');

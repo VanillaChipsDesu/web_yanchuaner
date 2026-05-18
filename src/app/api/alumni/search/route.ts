@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
+import { requireAccessOrAdmin } from '@/lib/admin-auth';
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +15,9 @@ function parseTags(tags: string | null): { university: string; major: string; ci
 }
 
 export async function GET(req: NextRequest) {
+  const auth = requireAccessOrAdmin(req);
+  if (auth) return auth;
+
   try {
     const { searchParams } = new URL(req.url);
     const q = (searchParams.get('q') || '').trim();
