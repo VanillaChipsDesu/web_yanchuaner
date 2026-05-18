@@ -2,6 +2,7 @@ export type Category = {
   id: string;
   label: string;
   desc: string;
+  href: string;
 };
 
 export type GuideCard = {
@@ -23,9 +24,11 @@ export type QAItem = {
 };
 
 export const categories: Category[] = [
-  { id: "application-guide", label: "志愿填报参考", desc: "分数、位次、专业、城市、学校层次的思考框架与信息收集方法" },
-  { id: "university-insights", label: "大学与专业观察", desc: "校友经验分享，了解真实的大学生活与专业选择" },
-  { id: "senior-qa", label: "学长问答", desc: "精选问答，解答在校生和家长的常见困惑" },
+  { id: "application-guide", label: "志愿填报参考", desc: "分数、位次、专业、城市、学校层次的思考框架与信息收集方法", href: "/students/application-guide" },
+  { id: "university-insights", label: "大学与专业观察", desc: "校友经验分享，了解真实的大学生活与专业选择", href: "/students/university-insights" },
+  { id: "senior-qa", label: "学长问答", desc: "精选问答，解答在校生和家长的常见困惑", href: "/students/senior-qa" },
+  { id: "learning-methods", label: "学习方法", desc: "时间管理、复习策略、心态调整等高中学习实用建议", href: "/students/learning-methods" },
+  { id: "alumni-messages", label: "校友寄语", desc: "学长学姐写给学弟学妹的话，关于选择、努力、大学与成长", href: "/students/alumni-messages" },
 ];
 
 export const guideCards: GuideCard[] = [
