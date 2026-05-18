@@ -79,3 +79,25 @@ export async function PUT(
     return NextResponse.json({ error: "更新新闻失败" }, { status: 500 });
   }
 }
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const auth = requireAdmin(req);
+  if (auth) return auth;
+
+  try {
+    const existing = await prisma.news.findUnique({ where: { id: params.id } });
+    if (!existing) {
+      return NextResponse.json({ error: "新闻不存在" }, { status: 404 });
+    }
+
+    await prisma.news.delete({ where: { id: params.id } });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Admin news DELETE error:", error);
+    return NextResponse.json({ error: "删除新闻失败" }, { status: 500 });
+  }
+}

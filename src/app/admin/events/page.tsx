@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { CalendarDays, Plus, Edit2, Users, Search } from 'lucide-react';
+import { CalendarDays, Plus, Edit2, Users, Search, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 
 type EventItem = {
@@ -21,6 +21,8 @@ export default function AdminEventsPage() {
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [search, setSearch] = useState('');
+  const [deleting, setDeleting] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<EventItem | null>(null);
 
   const filteredEvents = useMemo(() => {
     if (!search.trim()) return events;
@@ -41,6 +43,26 @@ export default function AdminEventsPage() {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!confirmDelete) return;
+    setDeleting(confirmDelete.id);
+    try {
+      const res = await fetch(`/api/admin/events/${confirmDelete.id}`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || '删除失败');
+      }
+      setEvents((prev) => prev.filter((e) => e.id !== confirmDelete.id));
+      setConfirmDelete(null);
+    } catch (err: any) {
+      alert('删除失败: ' + err.message);
+    } finally {
+      setDeleting(null);
     }
   };
 
@@ -154,18 +176,55 @@ export default function AdminEventsPage() {
                   </td>
                   <td className="px-4 py-3">{statusBadge(item.status)}</td>
                   <td className="px-4 py-3">
-                    <Link
-                      href={`/admin/events/${item.id}`}
-                      className="inline-flex items-center gap-1 rounded-lg border border-[#7C3AED]/20 bg-[#7C3AED]/5 px-2.5 py-1 text-xs text-[#7C3AED] transition hover:bg-[#7C3AED]/10 cursor-pointer"
-                    >
-                      <Edit2 size={14} />
-                      编辑
-                    </Link>
+                    <div className="flex gap-2">
+                      <Link
+                        href={`/admin/events/${item.id}`}
+                        className="inline-flex items-center gap-1 rounded-lg border border-[#7C3AED]/20 bg-[#7C3AED]/5 px-2.5 py-1 text-xs text-[#7C3AED] transition hover:bg-[#7C3AED]/10 cursor-pointer"
+                      >
+                        <Edit2 size={14} />
+                        编辑
+                      </Link>
+                      <button
+                        onClick={() => setConfirmDelete(item)}
+                        className="inline-flex items-center gap-1 rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1 text-xs text-rose-600 transition hover:bg-rose-100 cursor-pointer"
+                      >
+                        <Trash2 size={14} />
+                        删除
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* 删除确认弹窗 */}
+      {confirmDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-md rounded-2xl border border-[#7C3AED]/10 bg-white p-6 shadow-xl">
+            <h3 className="text-lg font-semibold text-[#4C1D95] font-heading">确认删除</h3>
+            <p className="mt-3 text-sm leading-6 text-[#4C1D95]/70">
+              确定删除活动《{confirmDelete.title}》吗？此操作不可撤销。
+            </p>
+            <div className="mt-5 flex justify-end gap-3">
+              <button
+                onClick={() => { setConfirmDelete(null); setDeleting(null); }}
+                disabled={!!deleting}
+                className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm text-[#4C1D95]/70 transition hover:bg-gray-50 disabled:opacity-50 cursor-pointer"
+              >
+                取消
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={!!deleting}
+                className="inline-flex items-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-4 py-2 text-sm text-rose-600 transition hover:bg-rose-100 disabled:opacity-50 cursor-pointer"
+              >
+                {deleting ? '删除中...' : '确认删除'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

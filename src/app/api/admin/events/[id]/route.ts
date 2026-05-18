@@ -96,3 +96,35 @@ export async function PUT(
     return NextResponse.json({ error: "更新活动失败" }, { status: 500 });
   }
 }
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const auth = requireAdmin(req);
+  if (auth) return auth;
+
+  try {
+    const existing = await prisma.event.findUnique({
+      where: { id: params.id },
+      include: { _count: { select: { registrations: true } } },
+    });
+    if (!existing) {
+      return NextResponse.json({ error: "活动不存在" }, { status: 404 });
+    }
+
+    if (existing._count.registrations > 0) {
+      return NextResponse.json(
+        { error: "该活动已有报名记录，暂不允许删除。请先保留或导出报名数据后再处理。" },
+        { status: 400 },
+      );
+    }
+
+    await prisma.event.delete({ where: { id: params.id } });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Admin events DELETE error:", error);
+    return NextResponse.json({ error: "删除活动失败" }, { status: 500 });
+  }
+}
