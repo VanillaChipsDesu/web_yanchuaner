@@ -86,7 +86,7 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: "/favicon.ico",
+    icon: "/icon.svg",
   },
 };
 
@@ -110,7 +110,7 @@ export default function RootLayout({
                   tabIndex={0}
                   className="group relative text-lg font-bold tracking-wide text-[#7C3AED] transition-colors duration-300 hover:text-[#5B21B6] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#7C3AED] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FAF5FF] rounded-sm cursor-pointer font-heading"
                 >
-                  {"\u71d5\u5ddd\u6570\u5b57\u6bcd\u6e2f"}
+                  {"\u71d5\u4e2d\u6570\u5b57\u6bcd\u6e2f"}
                   <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-[#7C3AED] shadow-[0_0_8px_rgba(124,58,237,0.5)] transition-all duration-300 group-hover:w-full"></span>
                 </Link>
                 <MobileNav />
@@ -124,7 +124,7 @@ export default function RootLayout({
               <div className="mx-auto max-w-6xl px-4 py-5 md:px-8">
                 <div className="flex flex-col items-center justify-between gap-2 text-sm text-[#7C3AED]/70 md:flex-row">
                   <p>
-                    {"\u00a9 2025-2026 \u71d5\u5ddd\u6821\u53cb\u6570\u5b57\u6bcd\u6e2f\uff08\u4e2a\u4eba\u516c\u76ca\u7248\uff09"}
+                    \u00a9 2025-2026 \u71d5\u4e2d\u6821\u53cb\u6570\u5b57\u6bcd\u6e2f\uff08\u4e2a\u4eba\u516c\u76ca\u7248\uff09
                   </p>
                   <p>{"\u58f0\u660e\uff1a\u4e2a\u4eba\u516c\u76ca\u3001\u975e\u5b98\u65b9\u3001\u65e0\u76c8\u5229"}</p>
                 </div>

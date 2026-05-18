@@ -277,7 +277,7 @@ fs.writeFileSync(sourcePath, JSON.stringify(finalAlumni, null, 2), "utf8");
 
 const starMsgs = finalAlumni.map((item) => ({
   name: mask(item.name),
-  message: item.message || "逐梦星辰，燕川常在",
+  message: item.message || "逐梦星辰，燕中常在",
 }));
 fs.writeFileSync(starOutPath, `export const starMessages = ${JSON.stringify(starMsgs, null, 2)};\n`, "utf8");
 

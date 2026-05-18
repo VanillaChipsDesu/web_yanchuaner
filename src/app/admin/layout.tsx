@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { BarChart3, Users, FileText, Newspaper, CalendarDays, BookUser, Home, Menu, X, LogOut } from 'lucide-react';
+import { BarChart3, Users, FileText, Newspaper, CalendarDays, BookUser, FileEdit, Home, Menu, X, LogOut } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -21,6 +21,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/news', label: '新闻管理', icon: Newspaper },
     { href: '/admin/events', label: '活动管理', icon: CalendarDays },
     { href: '/admin/alumni', label: '校友名单', icon: BookUser },
+    { href: '/admin/alumni-corrections', label: '信息修改申请', icon: FileEdit },
     { href: '/', label: '返回母港', icon: Home },
   ];
 

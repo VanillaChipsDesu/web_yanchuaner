@@ -13,3 +13,5 @@ dev.db
 
 /src/generated/prisma
 .claude/
+prod.db
+public/uploads/

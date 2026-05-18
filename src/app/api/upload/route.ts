@@ -32,7 +32,13 @@ export async function POST(req: NextRequest) {
 
     // 生成唯一文件名
     const hash = createHash('md5').update(buffer).digest('hex').slice(0, 8);
-    const ext = file.name.split('.').pop() || 'jpg';
+    const MIME_EXT: Record<string, string> = {
+      'image/jpeg': 'jpg',
+      'image/png': 'png',
+      'image/webp': 'webp',
+      'image/gif': 'gif',
+    };
+    const ext = MIME_EXT[file.type] || 'jpg';
     const filename = `${Date.now()}-${hash}.${ext}`;
 
     // 确保上传目录存在

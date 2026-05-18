@@ -1,8 +1,11 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { getCachedOrFetch } from '@/lib/cache';
+import { requireAccessOrAdmin } from '@/lib/admin-auth';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const auth = requireAccessOrAdmin(req);
+  if (auth) return auth;
   try {
     const data = await getCachedOrFetch('api:alumni:map', 300, async () => {
       const records = await prisma.whitelistRoster.findMany({
