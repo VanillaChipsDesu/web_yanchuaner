@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createHash } from "crypto";
 import { signToken } from "@/lib/verify-token";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "";
 const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH || "";
@@ -13,6 +14,18 @@ const TOKEN_TTL_DAYS = 7;
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = getClientIp(req);
+    const limit = await rateLimit(`login:${ip}`, 10, 60_000);
+    if (!limit.ok) {
+      return NextResponse.json(
+        { error: "尝试过于频繁，请稍后再试" },
+        {
+          status: 429,
+          headers: { "Retry-After": String(limit.retryAfter) },
+        },
+      );
+    }
+
     const body = await req.json();
     const exp = Date.now() + TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000;
 
