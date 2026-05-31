@@ -342,7 +342,7 @@ export default function AdminAlumniPage() {
           <div className="flex items-center justify-center gap-2 py-20 text-sm text-rose-600">
             <AlertTriangle size={16} />
             {error}
-            <button onClick={fetchAlumni} className="ml-2 underline cursor-pointer">
+            <button type="button" onClick={fetchAlumni} className="ml-2 underline cursor-pointer">
               重试
             </button>
           </div>
