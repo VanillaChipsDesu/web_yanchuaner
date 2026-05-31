@@ -1,5 +1,34 @@
 # 燕中校友数字母港
 
+## 快速了解顺序
+
+如果你是第一次接手这个项目，建议按下面顺序阅读：
+
+1. [docs/README.md](README.md) - 先看文档入口和阅读顺序
+2. 本文件 - 了解项目定位、功能边界、技术栈和数据结构
+3. [ROUTES.md](ROUTES.md) - 搞清楚前台、后台和 API 的路由与权限
+4. [OPERATIONS_GUIDE.md](OPERATIONS_GUIDE.md) - 确认本地开发、环境变量和常用操作
+5. [ADMIN_GUIDE.md](ADMIN_GUIDE.md) - 看管理员实际怎么操作
+6. [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) - 了解如何发布与运行
+
+## 优化项目的切入点
+
+如果后续要继续优化项目，优先从下面这些地方入手：
+
+- 路由与导航：统一首页、新闻、活动、校友证、后台的入口与高亮状态
+- 认证与权限：普通口令、管理员 cookie、API 权限分层是否清晰
+- 证书与图片链路：背景上传、裁切、证书导出、上传目录持久化
+- 后台体验：列表筛选、编辑表单、删除确认、导出和审核流程
+- 文档同步：新增页面、API、环境变量或运维流程后，及时更新 docs 目录
+
+## 维护者提示
+
+- 不要把线上生产数据库当作开发库使用
+- 任何影响登录、上传、导出、审核的改动，都先跑 lint、build 和 smoke test
+- 如果需要快速修改访问口令或管理员账号密码，优先查看 [OPERATIONS_GUIDE.md](OPERATIONS_GUIDE.md)
+
+## 项目基本信息
+
 - 正式校名：燕川中学
 - 简称：燕中
 - 域名：yanchuaner.cn
@@ -83,9 +112,9 @@ prisma/                      # Prisma schema
 
 ## 相关文档
 
-- [运营指南](OPERATIONS_GUIDE.md) — 本地开发、环境变量、后台操作
-- [管理员使用手册](ADMIN_GUIDE.md) — 后台功能详细操作说明
-- [部署与运维](DEPLOYMENT_GUIDE.md) — 构建、部署、Nginx、HTTPS
-- [数据备份](BACKUP_GUIDE.md) — 备份与恢复操作
-- [路由清单](ROUTES.md) — 所有页面与 API 路由及权限
-- [故障排除](TROUBLESHOOTING.md) — 常见问题与修复
+- [运营指南](OPERATIONS_GUIDE.md) - 本地开发、环境变量、后台操作
+- [管理员使用手册](ADMIN_GUIDE.md) - 后台功能详细操作说明
+- [部署与运维](DEPLOYMENT_GUIDE.md) - 构建、部署、Nginx、HTTPS
+- [数据备份](BACKUP_GUIDE.md) - 备份与恢复操作
+- [路由清单](ROUTES.md) - 所有页面与 API 路由及权限
+- [故障排除](TROUBLESHOOTING.md) - 常见问题与修复

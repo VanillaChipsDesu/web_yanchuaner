@@ -33,6 +33,22 @@ Windows 本地开发使用 SQLite dev.db，所有数据变更通过 Prisma schem
 
 > `.env` 不要提交到 git。`.env.example` 只写占位值。
 
+### 凭证快捷修改
+
+项目内提供了一个一键更新脚本，用于修改访问口令、管理员账号、管理员密码：
+
+```bash
+cp credentials.example.json credentials.local.json
+node scripts/set-credentials.js
+```
+
+说明：
+
+- `credentials.local.json` 只保存在本地，不入库
+- 脚本采用原子写入并保留备份，适合快速轮换凭证
+- 修改后需要重启开发服务或生产进程才能完全生效
+- 如需回滚，可使用脚本输出中给出的恢复命令
+
 ---
 
 ## 后台操作
