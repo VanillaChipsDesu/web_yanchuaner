@@ -104,7 +104,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 p-4 md:ml-64 md:p-8">
+      <main id="main" className="flex-1 p-4 md:ml-64 md:p-8">
         {/* Mobile header with hamburger */}
         <div className="mb-4 flex items-center md:hidden">
           <button
