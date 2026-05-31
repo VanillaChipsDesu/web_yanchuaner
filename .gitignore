@@ -7,6 +7,10 @@ node_modules
 
 # Development database
 dev.db
+dev.db-shm
+dev.db-wal
+prod.db-shm
+prod.db-wal
 
 # Editor tooling
 .opencode/
