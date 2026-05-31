@@ -296,6 +296,117 @@ async function run() {
       `status=${r.status} location=${loc}`);
   }
 
+  // 15. Generate a synthetic test image via sharp (avoids checking in test fixtures).
+  //     If sharp isn't available we skip the upload tests cleanly.
+  let testImageBuf = null;
+  try {
+    const sharp = require("sharp");
+    testImageBuf = await sharp({
+      create: {
+        width: 1920,
+        height: 1080,
+        channels: 3,
+        background: { r: 80, g: 60, b: 200 },
+      },
+    })
+      .jpeg({ quality: 80 })
+      .toBuffer();
+  } catch (e) {
+    record("test_image_generated", false, `sharp unavailable: ${e.message}`);
+  }
+  if (testImageBuf) {
+    record("test_image_generated", true, `bytes=${testImageBuf.length}`);
+  }
+
+  // 16. Personal bg upload — public API, returns 200 + /uploads/<file>
+  let userBgUrl = null;
+  if (testImageBuf) {
+    const fd = new FormData();
+    fd.append("file", new Blob([testImageBuf], { type: "image/jpeg" }), "user-bg.jpg");
+    const r = await fetch(BASE + "/api/alumni/certificate/upload-bg", {
+      method: "POST",
+      body: fd,
+      redirect: "manual",
+    });
+    const body = await r.json().catch(() => null);
+    userBgUrl = body?.url || null;
+    record(
+      "personal_bg_upload_succeeds",
+      r.status === 200 && body?.success === true && /^\/uploads\/bg-/.test(body?.url || "") &&
+        body?.width === 2752 && body?.height === 1548,
+      `status=${r.status} url=${body?.url} size=${body?.width}x${body?.height}`,
+    );
+  } else {
+    record("personal_bg_upload_succeeds", false, "skipped: no test image");
+  }
+
+  // 17. Personal bg file is persisted on disk (Next standalone snapshots public/ at boot,
+  //     so we verify the file reached public/uploads/ rather than via HTTP. In production
+  //     the volume-mounted UPLOAD_DIR is served by the reverse proxy.)
+  if (userBgUrl) {
+    const filename = userBgUrl.replace(/^\/uploads\//, "");
+    const onDisk = path.join(STANDALONE, "public", "uploads", filename);
+    const exists = fs.existsSync(onDisk);
+    const stat = exists ? fs.statSync(onDisk) : null;
+    record("personal_bg_persisted_on_disk",
+      exists && stat && stat.size > 0,
+      `path=public/uploads/${filename} exists=${exists} bytes=${stat?.size ?? 0}`);
+  } else {
+    record("personal_bg_persisted_on_disk", false, "skipped: no upload url");
+  }
+
+  // 18. Admin card-bg upload requires admin — anon -> 401
+  if (testImageBuf) {
+    const fd = new FormData();
+    fd.append("file", new Blob([testImageBuf], { type: "image/jpeg" }), "admin-bg.jpg");
+    const r = await fetch(BASE + "/api/settings/card-bg/upload", {
+      method: "POST",
+      body: fd,
+      redirect: "manual",
+    });
+    record("admin_bg_upload_requires_admin", r.status === 401, `status=${r.status}`);
+  } else {
+    record("admin_bg_upload_requires_admin", false, "skipped: no test image");
+  }
+
+  // 19. Admin card-bg upload with forged admin cookie — 200 + backup metadata
+  if (testImageBuf) {
+    const fd = new FormData();
+    fd.append("file", new Blob([testImageBuf], { type: "image/jpeg" }), "admin-bg.jpg");
+    const r = await fetch(BASE + "/api/settings/card-bg/upload", {
+      method: "POST",
+      headers: { Cookie: `yc_access_token=${adminCookie}` },
+      body: fd,
+      redirect: "manual",
+    });
+    const body = await r.json().catch(() => null);
+    record(
+      "admin_bg_upload_succeeds",
+      r.status === 200 && body?.success === true && body?.url === "/card.jpg" &&
+        body?.width === 2752 && body?.height === 1548 &&
+        (typeof body?.backup === "string" || body?.backup === null),
+      `status=${r.status} url=${body?.url} backup=${body?.backup}`,
+    );
+  } else {
+    record("admin_bg_upload_succeeds", false, "skipped: no test image");
+  }
+
+  // 20. /card.jpg is reachable after admin upload
+  {
+    const r = await fetch(BASE + "/card.jpg", { redirect: "manual" });
+    record("card_jpg_reachable", r.status === 200, `status=${r.status}`);
+  }
+
+  // 21. Certificate page references the new card.jpg path (or the user can replace it via uploaded URL)
+  {
+    const r = await fetch(BASE + "/alumni/certificate", { redirect: "manual" });
+    const body = await r.text();
+    const hasRef = body.includes("/card.jpg") || body.includes("loadCanvasImage");
+    record("certificate_page_references_card_jpg",
+      r.status === 200 && hasRef,
+      `status=${r.status} hasRef=${hasRef}`);
+  }
+
   return Object.values(results).every((v) => v.status === "passed");
 }
 
