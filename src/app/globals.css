@@ -803,3 +803,26 @@ body::after {
     animation-duration: 38s;
   }
 }
+
+/* Honour user's motion preference: kill ambient animations and damp transitions. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  body::before,
+  body::after,
+  .meteor-layer,
+  .meteor-layer::before,
+  .meteor-layer::after,
+  .starfield,
+  .starfield::before,
+  .starfield::after {
+    animation: none !important;
+  }
+}

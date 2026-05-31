@@ -98,6 +98,12 @@ export default function RootLayout({
   return (
     <html lang="zh-CN" className={`${openSans.variable} ${poppins.variable} ${notoSansSC.variable}`}>
       <body className="font-sans antialiased text-[#4C1D95] bg-[#FAF5FF]">
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-[#7C3AED] focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-white focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#7C3AED] focus:ring-offset-2 focus:ring-offset-[#FAF5FF]"
+        >
+          跳到正文
+        </a>
         <Gatekeeper initialIsVerified={false}>
           <UUIDCompat />
           <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-[#FAF5FF] to-[#F3E8FF]">
@@ -117,7 +123,7 @@ export default function RootLayout({
               </div>
             </header>
 
-            <main className="relative z-10">{children}</main>
+            <main id="main" className="relative z-10">{children}</main>
 
             {/* 页脚 */}
             <footer className="glass relative z-10 border-t border-[#7C3AED]/10">
