@@ -29,6 +29,8 @@ prod.db
 public/uploads/
 data/
 data/backups/
+alumni_roster.csv
+source_alumni.json
 
 # Allow source code data directory
 !src/data/

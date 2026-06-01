@@ -68,13 +68,13 @@ explorer.exe .
 # 4. CloudShell 中点「上传文件」，选桌面的 deploy.tar.gz
 
 # 5. CloudShell 中传到 ECS
-scp /home/user/deploy.tar.gz root@121.37.68.136:/tmp/
-# 密码：Hwy070507
-# 如果提示 Input 'XXXX'.Problem contact HSS:XXXX  → 输入它显示的4位数字
+scp /home/user/deploy.tar.gz root@<服务器IP>:/tmp/
+# 密码：<你的SSH密码>
+# 如果提示 Input 'XXXX'.Problem contact HSS:XXXX → 输入它显示的4位数字
 
 # 6. SSH 进服务器
-ssh root@121.37.68.136
-# 密码：Hwy070507
+ssh root@<服务器IP>
+# 密码：<你的SSH密码>
 ```
 
 ### 第三阶段：服务器部署
@@ -224,11 +224,11 @@ DATABASE_URL="file:/var/www/alumni-site/data/prod.db"
 PORT=3000
 SITE_URL="https://yanchuaner.cn"
 SITE_NAME="燕中校友数字母港"
-ACCESS_PASSWORD_HASH="8f7ec246a06be739b1774bce02e77b600519a62585f677330a225aa37c7a31e4"
-ACCESS_PASSWORD="yanzhongxiaoyouhui"
-ADMIN_USERNAME="yanchuaner"
-ADMIN_PASSWORD_HASH="615ed7fb1504b0c724a296d7a69e6c7b2f9ea2c57c1d8206c5afdf392ebdfd25"
-SESSION_SECRET="12f60fe9c40ad630900e9032bbbd2d9577bf1e2390ae307221e522b81239cf4e"
+ACCESS_PASSWORD_HASH="<口令SHA256哈希>"
+ACCESS_PASSWORD="<你的访问口令>"
+ADMIN_USERNAME="<管理员用户名>"
+ADMIN_PASSWORD_HASH="<管理员密码SHA256哈希>"
+SESSION_SECRET="<随机生成32字节hex密钥>"
 ```
 
 ---
