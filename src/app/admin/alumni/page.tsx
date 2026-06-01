@@ -267,6 +267,7 @@ export default function AdminAlumniPage() {
             ref={fileInputRef}
             type="file"
             accept=".csv"
+            aria-label="选择CSV文件导入校友"
             className="hidden"
             onChange={handleImport}
           />

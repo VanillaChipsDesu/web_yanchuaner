@@ -143,7 +143,7 @@ export default function MobileNav() {
         type="button"
         onClick={() => setOpen(!open)}
         aria-label={open ? '关闭导航菜单' : '打开导航菜单'}
-        aria-expanded={open}
+        aria-expanded={open ? 'true' : 'false'}
         aria-controls="mobile-drawer"
         className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[#7C3AED]/30 bg-[#7C3AED]/10 text-[#7C3AED] lg:hidden cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#7C3AED] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FAF5FF]"
       >
