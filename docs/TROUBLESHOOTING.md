@@ -1,123 +1,201 @@
-# 故障排除（实测问题记录）
+# 故障排除
 
-本文档记录项目开发与运维中遇到的关键问题及修复方案。
-
-## 1. UTF-8 编码导致构建失败
-
-### 现象
-- `npm run build` 失败。
-- 错误信息包含 `stream did not contain valid UTF-8`。
-
-### 原因
-- 新建/拷贝的 TS/TSX 文件中混入了非 UTF-8 字节。
-
-### 修复步骤
-1. 将异常文件重写为纯 UTF-8。
-2. 代码中使用 Unicode 转义（如 `你好`）时保持编码一致。
-3. 重新执行 `npm run build` 验证。
+本文档记录项目开发与运维中实际遇到的问题及修复方案。按分类编排，方便快速定位。
 
 ---
 
-## 2. SSR 水合冲突（JoinRequestModal 白屏）
+## 构建问题
 
-### 现象
-- 首页报 500 错误。
-- 控制台水合错误信息。
+### 1. UTF-8 编码导致构建失败
 
-### 原因
-- 模态框组件 SSR 和客户端水合阶段执行时机不一致。
+**现象**：
+- `npm run build` 失败
+- 错误信息包含 `stream did not contain valid UTF-8`
 
-### 修复步骤
-1. 在组件中添加 mounted 状态：
-   - `const [mounted, setMounted] = useState(false)`
-   - `useEffect(() => setMounted(true), [])`
-   - `if (!mounted) return null`
-2. 使用 dynamic 跳过 SSR：
-   - `dynamic(() => import('...'), { ssr: false })`
-3. 重新构建验证。
+**原因**：新建或复制的 TS/TSX 文件中混入了非 UTF-8 字节（如 GBK 编码的中文文件）
 
----
+**修复**：
+1. 确认文件编码为 UTF-8：`file src/app/xxx/page.tsx`
+2. 将异常文件重写为 UTF-8 编码
+3. 重新执行 `npm run build`
 
-## 3. Tailwind 扫描失效（样式纯文字）
+### 2. 构建卡死 / 长时间无输出
 
-### 现象
-- 页面无样式，纯文字显示。
+**现象**：`npm run build` 停在某个阶段不动，终端没有报错但也不结束
 
-### 原因
-- `tailwind.config.ts` 中 `content` 未覆盖 `src/app`、`src/components` 等目录。
-- 或编译中间产物导致 CSS 失效。
+**常见原因**：
+- 有正在运行的 `node server.js` 或 `next start` 进程占用端口
+- `.next/standalone/` 正被运行中的服务读取，新构建无法落盘
+- 内存不足导致构建缓慢
 
-### 修复步骤
-1. 确认 `content` 至少包含：
-   - `./src/pages/**/*.{js,ts,jsx,tsx,mdx}`
-   - `./src/components/**/*.{js,ts,jsx,tsx,mdx}`
-   - `./src/app/**/*.{js,ts,jsx,tsx,mdx}`
-2. 检查 `postcss.config.mjs` 是否包含 `tailwindcss` 和 `autoprefixer`。
-3. 清缓存并重新构建。
+**处理步骤**：
+1. 检查是否有旧服务占用端口：`lsof -i :3000` 或 `netstat -tlnp | grep 3000`
+2. 停止正在运行的 Node 服务后重试
+3. 删除 `.next` 目录后重新构建
+4. 内存不足时可增大 Node 内存限制：`NODE_OPTIONS=--max_old_space_size=4096 npm run build`
+5. 逐步排查：先执行 `npx tsc --noEmit` 验证类型，再构建
 
----
+**经验规则**：
+- 构建完全无输出超过 5 分钟时，先停服务再重试，不要无限等待
+- 构建和服务尽量错峰执行，避免同一目录同时读写
 
-## 4. Webpack 模块缓存冲突（webpack_modules 残留）
+### 3. webpack_modules 残留冲突
 
-### 现象
-- 运行时 `webpack_modules` 相关报错。
-- 可能伴随 `moduleId is not a function` 异常。
+**现象**：运行时 `webpack_modules` 相关报错，可能伴随 `moduleId is not a function`
 
-### 原因
-- `.next` 构建产物与当前代码版本不匹配，模块引用映射失效。
+**原因**：`.next` 构建产物与当前代码版本不匹配
 
-### 修复步骤
-1. 手动删除 `.next`。
-2. 重新 dev 或 build。
-3. 若仍然异常，同时删除 `node_modules/.cache`。
+**修复**：
+1. 删除 `.next` 目录
+2. 删除 `node_modules/.cache`（如果存在）
+3. 重新 `npm run dev` 或 `npm run build`
 
 ---
 
-## 5. WSL 端口与缓存清理（404 资源丢失）
+## 运行时问题
 
-### 现象
-- `/_next/static/...` 返回 404。
-- 页面偶发样式加载失败。
+### 4. SSR 水合冲突（页面白屏）
 
-### 原因
-- 多个 Node/Next 进程占用端口。
-- 前次构建产物与当前运行环境冲突。
+**现象**：页面报 500 错误，控制台出现 hydration 相关错误信息
 
-### 修复步骤
-1. 终止所有进程：`killall -9 node`。
-2. 删除 `.next` 和 `node_modules/.cache`。
-3. 固定端口重启（必要时更换端口验证）。
-4. 强刷新浏览器（Ctrl+Shift+R）。
+**常见场景**：模态框组件、客户端交互组件在 SSR 和客户端渲染阶段不一致
 
----
+**修复方式一（添加 mounted 状态）**：
+```tsx
+const [mounted, setMounted] = useState(false);
+useEffect(() => setMounted(true), []);
+if (!mounted) return null;
+```
 
-## 6. build 看起来卡死
+**修复方式二（跳过 SSR）**：
+```tsx
+import dynamic from 'next/dynamic';
+const Component = dynamic(() => import('./Component'), { ssr: false });
+```
 
-### 现象
-- `npm run build` 长时间没有新输出。
-- 构建停在 emit 阶段，终端没有报错但也不结束。
+### 5. Tailwind 样式失效（页面纯文字）
 
-### 常见原因
-- 有正在运行的 `node server.js` 或 `next start` 进程占住了 3000 端口。
-- `.next/standalone/` 正在被运行中的服务读取，导致新构建无法顺利落盘。
-- 原生依赖构建较慢或内存不足，表现为长时间无输出。
+**现象**：页面无样式，纯文字显示
 
-### 处理步骤
-1. 先检查是否有旧服务占用端口 3000。
-2. 停止正在运行的 Node/Next 服务后，再重新执行构建。
-3. 如果仍然缓慢，删除 `.next` 后重试。
-4. 若怀疑内存问题，增大 `NODE_OPTIONS=--max_old_space_size=4096` 再试一次。
-5. 仍然失败时，单独执行 `npx tsc --noEmit` 和依赖重建，逐步排查问题。
+**原因**：
+- `tailwind.config.ts` 中 `content` 配置未覆盖所有源码目录
+- 或编译中间产物导致 CSS 丢失
 
-### 经验规则
-- 构建完全没有输出并持续超过较长时间时，先停服务再重试，不要无限等待。
-- 生产服务和构建尽量错峰执行，避免同一目录同时读写。
+**修复**：
+1. 确认 `tailwind.config.ts` 的 `content` 至少包含：
+   ```ts
+   content: [
+     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
+     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+   ]
+   ```
+2. 确认 `postcss.config.mjs` 包含 `tailwindcss` 和 `autoprefixer`
+3. 清缓存并重新构建
 
----
+### 6. 静态资源 404（/_next/static/... 丢失）
 
-## 推荐快速修复流程
+**现象**：`/_next/static/...` 返回 404，页面样式或 JS 加载失败
 
-1. 终止所有 Node 进程
+**原因**：
+- 多个 Node/Next 进程同时运行，端口或资源冲突
+- 前次构建产物与当前运行环境不一致
+
+**修复**：
+1. 终止所有 Node 进程：`killall -9 node`（Linux）/ 任务管理器结束 node.exe（Windows）
 2. 删除 `.next` 和 `node_modules/.cache`
-3. `npm run dev` 或 `npm run build`
-4. 浏览器强刷（Ctrl+Shift+R）
+3. 重新启动开发服务器
+4. 浏览器强制刷新（Ctrl+Shift+R）
+
+### 7. 图片上传失败
+
+**现象**：后台上传图片时报错或无响应
+
+**排查步骤**：
+1. 检查上传目录权限：
+   ```bash
+   ls -la /var/www/alumni-site/uploads/
+   # 确保 www-data 用户有写入权限
+   ```
+2. 检查磁盘空间：`df -h`
+3. 检查 Nginx 上传大小限制（`client_max_body_size`）
+4. 检查 `next.config.mjs` 中的 `serverActions.bodySizeLimit` 是否足够
+
+### 8. 数据库锁定（SQLite 并发冲突）
+
+**现象**：写入操作报错 `SQLITE_BUSY` 或操作卡住
+
+**原因**：SQLite 不支持高并发写入，同时有多个写操作时可能冲突
+
+**修复**：
+1. 等待当前操作完成后重试
+2. 如持续出现，重启服务：`sudo systemctl restart alumni-site`
+3. 考虑在应用层加入写入队列或减少并发写入
+
+---
+
+## 认证问题
+
+### 9. 登录后反复跳回登录页
+
+**可能原因**：
+- Cookie 已过期或被清除
+- `SESSION_SECRET` 环境变量与签发 token 时不一致
+- 浏览器阻止了第三方 cookie
+
+**排查**：
+1. 检查浏览器开发者工具 → Application → Cookies → 确认 `yc_access_token` 存在
+2. 检查 `.env` 中 `SESSION_SECRET` 是否与上次启动时一致
+3. 清除浏览器所有 cookie 后重新登录
+
+### 10. API 返回 401 Unauthorized
+
+**排查**：
+1. 确认已通过口令验证页面输入正确口令
+2. 检查 cookie 是否过期（重新登录看是否恢复）
+3. 如果是管理员 API（`/api/admin/*`），确认当前登录的是管理员账号而非普通口令
+4. 查看服务端日志确认具体拒绝原因
+
+---
+
+## 部署问题
+
+### 11. 部署后首页正常但后台 500
+
+**可能原因**：
+- Prisma schema 未在服务器同步（`npx prisma db push` 未执行）
+- 数据库文件路径不正确
+
+**修复**：
+1. SSH 登录服务器
+2. 进入应用目录：`cd /var/www/alumni-site/app`
+3. 执行：`npx prisma db push`
+4. 确认 `.env` 中 `DATABASE_URL` 指向正确的数据库路径
+5. 重启服务
+
+### 12. 证书过期（HTTPS 不可用）
+
+**检查与续期**：
+```bash
+sudo certbot renew --dry-run    # 测试续期流程
+sudo certbot renew               # 正式续期
+sudo systemctl reload nginx      # 重新加载证书
+```
+
+---
+
+## 快速修复流程（万能方案）
+
+遇到不确定原因的问题时，按以下顺序尝试：
+
+1. **终止所有 Node 进程**
+2. **删除** `.next` 和 `node_modules/.cache`
+3. **重新安装依赖**：`npm ci`
+4. **重新构建或启动**：`npm run dev` 或 `npm run build`
+5. **浏览器强制刷新**（Ctrl+Shift+R / Cmd+Shift+R）
+6. **如果仍不行**，查看浏览器控制台（F12）和服务端日志：
+   ```bash
+   sudo journalctl -u alumni-site -n 100
+   ```
+
+这能解决大多数由缓存、构建残留或进程冲突引起的问题。
