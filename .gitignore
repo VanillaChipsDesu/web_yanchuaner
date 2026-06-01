@@ -8,6 +8,7 @@ credentials.local.json
 
 # Build output
 .next/
+*.tsbuildinfo
 
 # Development database
 dev.db
