@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { CalendarDays, ArrowLeft, Upload, Users } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 
 function toLocalDatetime(isoString: string): string {
@@ -268,9 +269,10 @@ export default function AdminEventsEditPage() {
           </div>
           {form.coverImage && (
             <div className="flex items-center gap-4">
-              <img
+              <Image
                 src={form.coverImage}
                 alt="封面预览"
+                fill
                 className="h-32 w-48 rounded-lg border border-[#7C3AED]/10 object-cover"
               />
               <button

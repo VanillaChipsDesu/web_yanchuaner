@@ -286,7 +286,8 @@ export default function AdminAlumniPage() {
           />
           <input
             type="text"
-            placeholder="搜索姓名、标签、届别..."
+            placeholder="搜索校友..."
+            aria-label="搜索校友"
             value={search}
             onChange={(e) => handleSearch(e.target.value)}
             className="input w-full pl-9"
@@ -317,6 +318,7 @@ export default function AdminAlumniPage() {
             </div>
             <button
               onClick={() => setImportResult(null)}
+              aria-label="关闭导入结果"
               className="cursor-pointer text-emerald-500 hover:text-emerald-700"
             >
               <X size={16} />
@@ -445,6 +447,7 @@ export default function AdminAlumniPage() {
           <div className="relative w-full max-w-md rounded-2xl border border-[#7C3AED]/10 bg-white p-6 shadow-xl">
             <button
               onClick={() => !formSaving && setShowForm(false)}
+              aria-label="关闭表单"
               className="absolute right-4 top-4 cursor-pointer text-[#4C1D95]/40 hover:text-[#4C1D95]"
             >
               <X size={18} />

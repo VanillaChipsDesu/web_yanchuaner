@@ -4,14 +4,14 @@
 # ============================================
 
 # --- Stage 1: 依赖安装 ---
-FROM node:20-alpine AS deps
+FROM node:22-alpine AS deps
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN npm ci --only=production --ignore-scripts
+RUN npm ci --only=production
 
 # --- Stage 2: 构建 ---
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 WORKDIR /app
 
 COPY package.json package-lock.json ./
@@ -19,10 +19,14 @@ RUN npm ci
 
 COPY . .
 RUN npx prisma generate
+
+# 构建时使用本地数据库（pre-rendering 需要）
+ENV DATABASE_URL="file:./prisma/dev.db"
+RUN npx prisma db push
 RUN npm run build
 
 # --- Stage 3: 运行 ---
-FROM node:20-alpine AS runner
+FROM node:22-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
@@ -38,6 +42,7 @@ COPY --from=builder /app/public ./public
 
 # 复制 Prisma 相关文件
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/prisma.config.ts ./
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 

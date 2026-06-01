@@ -94,7 +94,7 @@ export async function middleware(req: NextRequest) {
     pathname === "/icon.svg" ||
     pathname === "/robots.txt" ||
     pathname === "/sitemap.xml" ||
-    pathname === "/access" ||
+
     pathname === "/admin/login"
   ) {
     return NextResponse.next();

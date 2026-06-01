@@ -1,10 +1,10 @@
 # 燕川中学校友数字母港
 
 <p align="left">
-	<img src="https://img.shields.io/badge/Next.js-14.2-black?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js" />
-	<img src="https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
-	<img src="https://img.shields.io/badge/Prisma-SQLite-2D3748?style=for-the-badge&logo=prisma&logoColor=white" alt="Prisma SQLite" />
-	<img src="https://img.shields.io/badge/TailwindCSS-3.4-38B2AC?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS" />
+  <img src="https://img.shields.io/badge/Next.js-14.2-black?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js" />
+  <img src="https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Prisma-SQLite-2D3748?style=for-the-badge&logo=prisma&logoColor=white" alt="Prisma SQLite" />
+  <img src="https://img.shields.io/badge/TailwindCSS-3.4-38B2AC?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS" />
 </p>
 
 公益、非官方的深圳市燕川中学校友会数字平台。仓库包含 Next.js 14 前端、Prisma + SQLite 数据层、HMAC 鉴权、Sharp 图像处理与后台管理能力。
@@ -43,13 +43,16 @@ src/
 │   │   ├── stories/                # 燕中故事浏览与投稿
 │   │   └── correction/             # 校友信息修改申请
 │   ├── admin/                      # 后台管理（12 个页面）
-│   └── api/                        # API 路由（31 个端点）
+│   ├── api/                        # API 路由（31 个端点）
+│   ├── globals.css                 # 全局样式
+│   ├── layout.tsx                  # 根布局
+│   └── loading.tsx                 # 全局加载页
 ├── components/                     # 通用组件（12 个）
 ├── data/                           # 静态数据（城市坐标、故事、记忆等 6 个文件）
-├── lib/                            # 工具库（缓存、限流、认证、图片处理等 7 个模块）
-└── styles/                         # 全局样式
-prisma/                             # Prisma schema 与迁移
-scripts/                            # 运维脚本（构建、种子数据、烟雾测试、凭据管理等 12 个）
+└── lib/                            # 工具库（缓存、限流、认证、图片处理等 7 个模块）
+prisma/                             # Prisma schema
+prisma.config.ts                    # Prisma 7.x 数据源配置
+scripts/                            # 运维脚本（构建、种子数据、烟雾测试、凭据管理等）
 docs/                               # 项目文档（8 个文件）
 ```
 

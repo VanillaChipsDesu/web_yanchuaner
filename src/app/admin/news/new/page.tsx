@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Newspaper, ArrowLeft, Upload } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 
 export default function AdminNewsNewPage() {
@@ -137,9 +138,10 @@ export default function AdminNewsNewPage() {
             )}
           </div>
           {form.imageUrl && (
-            <img
+            <Image
               src={form.imageUrl}
               alt="封面预览"
+              fill
               className="mt-2 h-32 w-48 rounded-lg border border-[#7C3AED]/10 object-cover"
             />
           )}

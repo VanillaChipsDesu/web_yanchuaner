@@ -58,11 +58,11 @@
 |------|------|------|
 | 框架 | Next.js (App Router) | 14.2 |
 | 语言 | TypeScript | 5.x |
-| ORM | Prisma | 最新 |
+| ORM | Prisma | 7.x |
 | 数据库 | SQLite | — |
 | 样式 | Tailwind CSS | 3.4 |
 | 地图 | Leaflet + react-leaflet | 1.9.4 |
-| 图像处理 | Sharp | — |
+| 图像处理 | Sharp | 0.34 |
 | 认证 | HMAC-SHA256 + httpOnly cookie | — |
 | 部署 | systemd + Nginx + `output: "standalone"` | — |
 
@@ -173,11 +173,11 @@ aerospace-alumni-site/
 │   │   ├── redis.ts                  # Redis 客户端
 │   │   ├── rate-limit.ts             # API 限流
 │   │   └── image-pipeline.ts         # 图片处理管道（Sharp）
-│   └── styles/                       # 全局样式
+│   └── globals.css                   # 全局样式
 ├── prisma/
-│   ├── schema.prisma                 # 数据模型定义
-│   └── migrations/                   # 数据库迁移
-├── scripts/                          # 运维脚本（12 个）
+│   └── schema.prisma                 # 数据模型定义
+├── prisma.config.ts                  # Prisma 7.x 数据源配置
+├── scripts/                          # 运维脚本
 │   ├── smoke-test.js                 # 关键路径回归测试
 │   ├── set-credentials.js            # 一键更新凭证
 │   ├── seed_content.js               # 种子内容数据
@@ -194,6 +194,10 @@ aerospace-alumni-site/
 ├── tsconfig.json                     # TypeScript 配置
 ├── .env.example                      # 环境变量模板
 ├── credentials.example.json          # 凭证模板
+├── Dockerfile                        # Docker 多阶段构建
+├── docker-compose.yml                # Docker Compose 编排
+├── .dockerignore                     # Docker 忽略规则
+├── prisma.config.ts                  # Prisma 7.x 数据源配置
 └── package.json                      # 项目依赖与脚本
 ```
 

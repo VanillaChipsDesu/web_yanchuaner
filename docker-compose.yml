@@ -3,8 +3,6 @@
 # 部署命令: docker compose up -d
 # ============================================
 
-version: "3.8"
-
 services:
   app:
     build:
@@ -16,13 +14,14 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=file:/data/site.db
-      - UPLOAD_DIR=/data/uploads
+      - DATABASE_URL=file:/data/prod.db
+      - PORT=3000
       # Redis (可选):
       # - REDIS_URL=redis://redis:6379
     volumes:
-      # 持久化目录 (数据库与上传文件均挂载于此)
+      # 持久化目录
       - ./data:/data
+      - ./uploads:/var/www/alumni-site/uploads
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
       interval: 30s

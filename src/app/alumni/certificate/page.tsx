@@ -574,7 +574,7 @@ export default function AlumniCertificatePage() {
       setCertificateNo(verifiedFixedID);
       await drawCertificate(verifiedName, verifiedClassName, verifiedFixedID, avatarDataUrl, bgUrl);
       handleDownload();
-      console.log(`身份核验通过：${verifiedName} - ${verifiedFixedID}`);
+      // 身份核验完成（不记录用户敏感信息到控制台）
       await new Promise((resolve) => window.setTimeout(resolve, 900));
       setIsPreviewVisible(true);
       setIsRendering(false);

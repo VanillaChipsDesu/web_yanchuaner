@@ -124,36 +124,14 @@
     box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
   }
 
-  .modal-overlay {
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
-    position: fixed;
-    inset: 0;
-    z-index: 40;
-  }
-
-  .modal {
-    background: white;
-    border-radius: 16px;
-    padding: 32px;
-    box-shadow: var(--shadow-xl);
-    max-width: 500px;
-    width: 90%;
-    position: relative;
-    z-index: 50;
-  }
-
-  /* Legacy Utilities Repurposed */
-  .cosmic-focus {
-    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-[#7C3AED] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FAF5FF] rounded-md transition-shadow duration-300;
-  }
-
-  .cosmic-btn {
-    @apply cursor-pointer transition-all duration-300 ease-in-out hover:scale-[1.02] hover:shadow-[#7C3AED]/20 active:scale-95 cosmic-focus;
-  }
-
   .glass-card-base {
-    @apply relative rounded-[12px] border border-[#7C3AED]/10 bg-white/60 backdrop-blur-xl shadow-sm p-6 cosmic-focus transition-all duration-300 hover:border-[#7C3AED]/30 hover:shadow-[#7C3AED]/10;
+    @apply relative rounded-[12px] border border-[#7C3AED]/10 bg-white/60 backdrop-blur-xl shadow-sm p-6 transition-all duration-300 hover:border-[#7C3AED]/30 hover:shadow-[#7C3AED]/10;
+    &:focus { outline: none; }
+    &:focus-visible {
+      @apply ring-2 ring-[#7C3AED] ring-offset-2 ring-offset-[#FAF5FF];
+    }
+    border-radius: 12px;
+    transition: box-shadow 300ms;
   }
 }
 
@@ -406,6 +384,7 @@ body::after {
 .glass {
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
 }
 
@@ -416,6 +395,7 @@ body::after {
 .glass-morphic {
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   box-shadow: 0 8px 30px rgba(124, 58, 237, 0.05);
 }
@@ -428,6 +408,7 @@ body::after {
   border-radius: 12px;
   padding: 1.5rem;
   background-color: white;
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   color: var(--color-text);
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -442,10 +423,10 @@ body::after {
   padding: 2px;
   background: linear-gradient(90deg, rgba(167, 139, 250, 0.1), rgba(124, 58, 237, 0.5), rgba(167, 139, 250, 0.5), rgba(167, 139, 250, 0.1));
   background-size: 200% 100%;
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask-composite: exclude;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
+  mask-composite: exclude;
   pointer-events: none;
   animation: gradient-flow 2s linear infinite;
   opacity: 0;
@@ -510,24 +491,6 @@ body::after {
 .stagger-grid > *:nth-child(4) { animation-delay: 0.4s; }
 .stagger-grid > *:nth-child(5) { animation-delay: 0.5s; }
 .stagger-grid > *:nth-child(6) { animation-delay: 0.6s; }
-
-.hero-glow-ring {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 140%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(167, 139, 250, 0.15) 0%, rgba(167, 139, 250, 0) 65%);
-  z-index: -1;
-  pointer-events: none;
-  animation: pulse-glow-ring 4s infinite alternate;
-}
-
-@keyframes pulse-glow-ring {
-  0% { transform: translate(-50%, -50%) scale(0.95); opacity: 0.6; }
-  100% { transform: translate(-50%, -50%) scale(1.05); opacity: 1; }
-}
 
 @keyframes title-sheen {
   0% { background-position: 120% 0; }
@@ -600,37 +563,6 @@ body::after {
   animation-delay: -4.2s;
 }
 
-.home-meteor {
-  position: absolute;
-  left: -30vw;
-  width: 16vw;
-  min-width: 120px;
-  height: 1.6px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, rgba(124, 58, 237, 0), rgba(124, 58, 237, 0.3) 44%, rgba(167, 139, 250, 0.6) 72%, rgba(124, 58, 237, 0));
-  opacity: 0;
-  transform: translate3d(-120vw, -20vh, 0) rotate(-14deg);
-  filter: drop-shadow(0 0 6px rgba(124, 58, 237, 0.2));
-  /* will-change removed for GPU memory optimization */
-}
-
-.home-meteor-a {
-  top: 20%;
-  animation: home-meteor-pass-a 23s linear infinite;
-}
-
-.home-meteor-b {
-  top: 46%;
-  animation: home-meteor-pass-b 31s linear infinite;
-  animation-delay: 7s;
-}
-
-.home-meteor-c {
-  top: 68%;
-  animation: home-meteor-pass-c 27s linear infinite;
-  animation-delay: 14s;
-}
-
 @keyframes home-star-breathe-1 {
   0% { opacity: 0.3; transform: translate3d(0, 0, 0); }
   50% { opacity: 0.6; transform: translate3d(0, -5px, 0); }
@@ -649,33 +581,6 @@ body::after {
   100% { opacity: 0.15; transform: translate3d(0, 0, 0); }
 }
 
-@keyframes home-meteor-pass-a {
-  0%, 82%, 100% { opacity: 0; transform: translate3d(-120vw, -20vh, 0) rotate(-14deg); }
-  85% { opacity: 0.6; transform: translate3d(-8vw, 5vh, 0) rotate(-14deg); }
-  88% { opacity: 0; transform: translate3d(112vw, 44vh, 0) rotate(-14deg); }
-}
-
-@keyframes home-meteor-pass-b {
-  0%, 86%, 100% { opacity: 0; transform: translate3d(-126vw, -24vh, 0) rotate(-12deg); }
-  89% { opacity: 0.5; transform: translate3d(-6vw, 3vh, 0) rotate(-12deg); }
-  92% { opacity: 0; transform: translate3d(114vw, 41vh, 0) rotate(-12deg); }
-}
-
-@keyframes home-meteor-pass-c {
-  0%, 84%, 100% { opacity: 0; transform: translate3d(-122vw, -26vh, 0) rotate(-15deg); }
-  87% { opacity: 0.45; transform: translate3d(-12vw, 1vh, 0) rotate(-15deg); }
-  90% { opacity: 0; transform: translate3d(108vw, 38vh, 0) rotate(-15deg); }
-}
-
-@keyframes panel-fade-in {
-  0% { opacity: 0; transform: translateY(8px) scale(0.992); }
-  100% { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-.panel-fade-in {
-  animation: panel-fade-in 260ms ease;
-}
-
 @media (prefers-reduced-motion: reduce) {
   body::before,
   body::after,
@@ -685,9 +590,6 @@ body::after {
   .meteor-layer::before,
   .meteor-layer::after,
   .home-breath-stars,
-  .home-meteor,
-  .panel-fade-in,
-  .hero-glow-ring,
   .animate-fade-in-up,
   .animate-pulse-glow,
   .cosmic-card::before,
@@ -784,10 +686,6 @@ body::after {
 }
 
 @media (max-width: 900px) {
-  .dashboard-stat-grid {
-    grid-template-columns: 1fr;
-  }
-
   .mobile-modal-shell {
     align-items: flex-end;
     padding: 0.75rem;
