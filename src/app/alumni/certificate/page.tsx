@@ -3,7 +3,7 @@
 import Link from "next/link";
 import NextImage from "next/image";
 import { ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
-import { CheckCircle2, ImagePlus, Rocket, X } from "lucide-react";
+import { CheckCircle2, IdCard, ImagePlus, Rocket, X } from "lucide-react";
 
 const CANVAS_WIDTH = 2752;
 const CANVAS_HEIGHT = 1548;
@@ -589,18 +589,74 @@ export default function AlumniCertificatePage() {
   };
 
   return (
-    <section className="mx-auto w-full max-w-6xl px-4 py-12 md:px-8">
-      <div className="rounded-3xl p-1 bg-white shadow-sm border border-gray-200">
-        <div className="glass-card-base rounded-3xl border-0 p-5 md:p-8">
-          <header className="mb-6 md:mb-8">
-            <h1 className="font-heading text-3xl font-bold text-[#4C1D95] md:text-4xl">{"数字纪念卡生成仓"}</h1>
-            <p className="mt-2 text-sm text-gray-700 md:text-base">{"输入姓名，点击点火起航，即可生成你的专属数字纪念卡。"}</p>
-            <p className="mt-2 text-[#7C3AED]">{"十年之约 · 2035 见"}</p>
-          </header>
+    <section className="mx-auto w-full max-w-6xl px-4 py-10 md:px-8 md:py-14">
+      {/* Hero — 仪式感顶部 */}
+      <header className="relative mb-8 overflow-hidden rounded-3xl border border-[#7C3AED]/15 bg-gradient-to-br from-white via-[#F5EDFF] to-[#EDE2FF] p-6 shadow-[0_8px_30px_-12px_rgba(124,58,237,0.18)] md:mb-10 md:p-10">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-[#A78BFA]/25 blur-3xl"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -bottom-32 -left-16 h-72 w-72 rounded-full bg-[#7C3AED]/15 blur-3xl"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-8 top-3 h-px bg-gradient-to-r from-transparent via-[#7C3AED]/40 to-transparent"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-8 bottom-3 h-px bg-gradient-to-r from-transparent via-[#7C3AED]/40 to-transparent"
+        />
 
-          <div className="grid gap-6 lg:grid-cols-[360px_1fr] lg:items-start">
-            <div className="space-y-4 rounded-2xl border border-gray-200 bg-white p-4 md:p-5 shadow-sm">
-              <label htmlFor="alumni-name" className="block text-sm font-medium text-gray-700">
+        <div className="relative flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <div className="max-w-2xl">
+            <span className="inline-flex items-center gap-2 rounded-full border border-[#7C3AED]/25 bg-white/70 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.22em] text-[#7C3AED] shadow-sm backdrop-blur">
+              <IdCard size={13} aria-hidden="true" />
+              Yanchuan Alumni Memorial Card
+            </span>
+            <h1 className="font-heading mt-4 text-3xl font-bold leading-tight text-[#3B0764] md:text-[40px] md:leading-[1.15]">
+              {"燕川中学校友"}
+              <span className="bg-gradient-to-r from-[#7C3AED] via-[#8B5CF6] to-[#5B21B6] bg-clip-text text-transparent">
+                {"电子纪念卡"}
+              </span>
+            </h1>
+            <p className="mt-3 text-sm leading-7 text-[#5B21B6]/85 md:text-[15px] md:leading-8">
+              {"输入姓名与班级，核验通过后即可生成属于你的专属电子纪念卡。"}
+              <br className="hidden md:inline" />
+              {"为这段共同的母港时光，留下一枚可以收藏与分享的印记。"}
+            </p>
+            <div className="mt-5 inline-flex items-center gap-3 rounded-full border border-[#7C3AED]/20 bg-white/70 px-4 py-1.5 text-xs text-[#5B21B6] shadow-sm backdrop-blur md:text-sm">
+              <span className="inline-flex h-1.5 w-1.5 rounded-full bg-[#7C3AED]" aria-hidden="true" />
+              {"十年之约 · 2035 见"}
+            </div>
+          </div>
+
+          <div className="flex shrink-0 items-center gap-3 md:flex-col md:items-end md:gap-2">
+            <div className="rounded-2xl border border-[#7C3AED]/20 bg-white/80 px-4 py-3 text-right shadow-sm backdrop-blur">
+              <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-[#7C3AED]/70">
+                Certificate
+              </p>
+              <p className="font-heading mt-1 text-base font-semibold text-[#4C1D95] md:text-lg">
+                Est. 2025
+              </p>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="grid gap-6 lg:grid-cols-[380px_1fr] lg:items-start">
+        {/* 输入区 — 三段分组 */}
+        <aside className="space-y-5 rounded-3xl border border-[#7C3AED]/12 bg-white p-5 shadow-[0_6px_24px_-12px_rgba(124,58,237,0.18)] md:p-6">
+          <fieldset className="space-y-3">
+            <legend className="mb-2 inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#7C3AED]">
+              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#7C3AED]/10 text-[10px] font-bold text-[#7C3AED]">
+                1
+              </span>
+              校友信息
+            </legend>
+            <div>
+              <label htmlFor="alumni-name" className="block text-sm font-medium text-[#4C1D95]">
                 {"姓名"}
               </label>
               <input
@@ -610,11 +666,13 @@ export default function AlumniCertificatePage() {
                 aria-label="姓名"
                 value={name}
                 onChange={(event) => setName(event.target.value)}
-                placeholder="请输入姓名"
-                className="input w-full"
+                placeholder="请输入与登记一致的姓名"
+                className="input mt-1.5 w-full"
               />
+            </div>
 
-              <label htmlFor="alumni-class" className="block text-sm font-medium text-gray-700">
+            <div>
+              <label htmlFor="alumni-class" className="block text-sm font-medium text-[#4C1D95]">
                 {"班级"}
               </label>
               <input
@@ -624,175 +682,221 @@ export default function AlumniCertificatePage() {
                 aria-label="班级"
                 value={className}
                 onChange={(event) => setClassName(event.target.value)}
-                placeholder="请输入班级"
-                className="input w-full"
+                placeholder="例如：2025届 1 班"
+                className="input mt-1.5 w-full"
               />
+            </div>
+          </fieldset>
 
-              <input
-                ref={avatarInputRef}
-                id="alumni-avatar"
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleAvatarUpload}
-              />
-              <button
-                type="button"
-                onClick={() => avatarInputRef.current?.click()}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[#7C3AED]/30 bg-[#7C3AED]/5 px-4 py-3 text-sm font-medium text-[#7C3AED] transition hover:bg-[#7C3AED]/10"
-              >
-                <ImagePlus size={17} />
-                <span>{"上传真人影像 (可选)"}</span>
-              </button>
+          <div className="h-px bg-gradient-to-r from-transparent via-[#7C3AED]/15 to-transparent" />
 
-              <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600">
-                {avatarDataUrl ? (
-                  <div className="flex items-center gap-3">
-                    <NextImage
-                      src={avatarDataUrl}
-                      alt={"头像预览"}
-                      width={44}
-                      height={44}
-                      unoptimized
-                      className="h-11 w-11 rounded-full border border-[#7C3AED]/40 object-cover"
-                    />
-                    <p className="min-w-0 flex-1 truncate text-[#4C1D95]">{avatarFileName || "已载入自定义影像"}</p>
-                    <button type="button"
-                      onClick={clearAvatar}
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-rose-200 text-rose-500 transition hover:bg-rose-50 focus:outline-none focus:ring-2 focus:ring-rose-400 focus:ring-offset-2"
-                      aria-label={"移除影像"}
-                      tabIndex={0}
-                    >
-                      <X size={14} aria-hidden="true" />
-                      <span className="sr-only">移除影像</span>
-                    </button>
-                  </div>
-                ) : (
-                  <p>{"未上传影像时，将自动使用星港默认徽标。"}</p>
-                )}
-              </div>
+          <fieldset className="space-y-3">
+            <legend className="mb-2 inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#7C3AED]">
+              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#7C3AED]/10 text-[10px] font-bold text-[#7C3AED]">
+                2
+              </span>
+              影像与背景（可选）
+            </legend>
 
-              <input
-                ref={bgInputRef}
-                id="alumni-bg"
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleBgUpload}
-              />
-              <button
-                type="button"
-                onClick={() => bgInputRef.current?.click()}
-                disabled={bgUploading}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[#7C3AED]/30 bg-[#7C3AED]/5 px-4 py-3 text-sm font-medium text-[#7C3AED] transition hover:bg-[#7C3AED]/10 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                <ImagePlus size={17} />
-                <span>{bgUploading ? "背景处理中..." : "上传专属背景 16:9 (可选)"}</span>
-              </button>
-              <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600">
-                {bgUrl ? (
-                  <div className="flex items-center gap-3">
-                    <NextImage
-                      src={bgUrl}
-                      alt={"背景预览"}
-                      width={56}
-                      height={32}
-                      unoptimized
-                      className="h-8 w-14 rounded border border-[#7C3AED]/30 object-cover"
-                    />
-                    <p className="min-w-0 flex-1 truncate text-[#4C1D95]">{bgFileName || "已载入个人背景"}</p>
-                    <button type="button"
-                      onClick={clearBg}
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-rose-200 text-rose-500 transition hover:bg-rose-50 focus:outline-none focus:ring-2 focus:ring-rose-400 focus:ring-offset-2"
-                      aria-label={"移除背景"}
-                      tabIndex={0}
-                    >
-                      <X size={14} aria-hidden="true" />
-                      <span className="sr-only">移除背景</span>
-                    </button>
-                  </div>
-                ) : (
-                  <p>{"未上传背景时，将使用站点默认 16:9 底图。"}</p>
-                )}
-              </div>
+            <input
+              ref={avatarInputRef}
+              id="alumni-avatar"
+              type="file"
+              accept="image/*"
+              aria-label="上传头像影像"
+              className="hidden"
+              onChange={handleAvatarUpload}
+            />
+            <button
+              type="button"
+              onClick={() => avatarInputRef.current?.click()}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-[#7C3AED]/35 bg-[#7C3AED]/[0.04] px-4 py-3 text-sm font-medium text-[#7C3AED] transition hover:border-[#7C3AED]/60 hover:bg-[#7C3AED]/10"
+            >
+              <ImagePlus size={16} aria-hidden="true" />
+              <span>{"上传头像影像"}</span>
+            </button>
 
-              <label htmlFor="alumni-captcha" className="block text-sm font-medium text-gray-700">
-                {`安全校验：${numA} + ${numB} = ?`}
-              </label>
-              <input
-                id="alumni-captcha"
-                type="text"
-                tabIndex={0}
-                aria-label="安全校验答案"
-                inputMode="numeric"
-                value={captchaInput}
-                onChange={(event) => setCaptchaInput(event.target.value)}
-                placeholder="请输入答案"
-                className="input w-full"
-              />
-
-              <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600">
-                <p>{"当前编号"}</p>
-                <p className="mt-1 font-semibold text-[#7C3AED] truncate">{certificateNo}</p>
-              </div>
-
-              <button
-                type="button"
-                onClick={handleGenerate}
-                disabled={isRendering}
-                className={`btn-primary w-full justify-center transition-all ${
-                  isSuccess
-                    ? "scale-[1.02] bg-emerald-500 hover:bg-emerald-600 shadow-md"
-                    : ""
-                } ${isRendering ? "cursor-not-allowed opacity-75 animate-pulse" : ""}`}
-              >
-                {isSuccess ? <CheckCircle2 size={18} /> : <Rocket size={18} />}
-                <span>
-                  {isRendering
-                    ? "身份核验中..."
-                    : isSuccess
-                      ? "生成成功" 
-                      : "点火生成"}
-                </span>
-              </button>
-
-              <Link href="/" className="btn-secondary w-full justify-center">
-                {"返回首页"}
-              </Link>
+            <div className="rounded-xl border border-[#7C3AED]/12 bg-[#FAF5FF] px-4 py-3 text-sm text-[#5B21B6]/80">
+              {avatarDataUrl ? (
+                <div className="flex items-center gap-3">
+                  <NextImage
+                    src={avatarDataUrl}
+                    alt={"头像预览"}
+                    width={44}
+                    height={44}
+                    unoptimized
+                    className="h-11 w-11 rounded-full border border-[#7C3AED]/40 object-cover shadow-sm"
+                  />
+                  <p className="min-w-0 flex-1 truncate text-[#4C1D95]">{avatarFileName || "已载入自定义影像"}</p>
+                  <button type="button"
+                    onClick={clearAvatar}
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-rose-200 text-rose-500 transition hover:bg-rose-50 focus:outline-none focus:ring-2 focus:ring-rose-400 focus:ring-offset-2"
+                    aria-label={"移除影像"}
+                    tabIndex={0}
+                  >
+                    <X size={14} aria-hidden="true" />
+                    <span className="sr-only">移除影像</span>
+                  </button>
+                </div>
+              ) : (
+                <p className="text-xs leading-6 md:text-[13px]">{"未上传时使用默认徽标头像。"}</p>
+              )}
             </div>
 
-            <div className="rounded-2xl border border-gray-200 bg-white p-4 md:p-5 shadow-sm">
-              <p className="mb-3 text-sm text-gray-600">
-                {isSuccess
-                  ? "纪念卡生成完毕！本卡仅供个人留念展示。"
-                  : "请长按上方卡片保存至相册"}
-              </p>
-
-              <div
-                className={`mx-auto w-full max-w-[920px] overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 transition-opacity duration-500 ${
-                  isPreviewVisible ? "opacity-100" : "opacity-0"
-                }`}
-              >
-                {previewDataUrl ? (
+            <input
+              ref={bgInputRef}
+              id="alumni-bg"
+              type="file"
+              accept="image/*"
+              aria-label="上传专属背景"
+              className="hidden"
+              onChange={handleBgUpload}
+            />
+            <button
+              type="button"
+              onClick={() => bgInputRef.current?.click()}
+              disabled={bgUploading}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-[#7C3AED]/35 bg-[#7C3AED]/[0.04] px-4 py-3 text-sm font-medium text-[#7C3AED] transition hover:border-[#7C3AED]/60 hover:bg-[#7C3AED]/10 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <ImagePlus size={16} aria-hidden="true" />
+              <span>{bgUploading ? "背景处理中…" : "上传专属背景（16:9）"}</span>
+            </button>
+            <div className="rounded-xl border border-[#7C3AED]/12 bg-[#FAF5FF] px-4 py-3 text-sm text-[#5B21B6]/80">
+              {bgUrl ? (
+                <div className="flex items-center gap-3">
                   <NextImage
-                    src={previewDataUrl}
-                    alt="数字纪念卡预览"
-                    width={CANVAS_WIDTH}
-                    height={CANVAS_HEIGHT}
+                    src={bgUrl}
+                    alt={"背景预览"}
+                    width={56}
+                    height={32}
                     unoptimized
-                    sizes="(max-width: 768px) 100vw, 600px"
-                    className={`mx-auto block aspect-video h-auto w-full max-w-[600px] transition duration-500 ${isSuccess ? "scale-[1.02]" : "scale-100"}`}
+                    className="h-8 w-14 rounded border border-[#7C3AED]/30 object-cover shadow-sm"
                   />
-                ) : (
-                  <div className="mx-auto aspect-video w-full max-w-[600px] animate-pulse bg-gray-100" />
-                )}
-              </div>
+                  <p className="min-w-0 flex-1 truncate text-[#4C1D95]">{bgFileName || "已载入个人背景"}</p>
+                  <button type="button"
+                    onClick={clearBg}
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-rose-200 text-rose-500 transition hover:bg-rose-50 focus:outline-none focus:ring-2 focus:ring-rose-400 focus:ring-offset-2"
+                    aria-label={"移除背景"}
+                    tabIndex={0}
+                  >
+                    <X size={14} aria-hidden="true" />
+                    <span className="sr-only">移除背景</span>
+                  </button>
+                </div>
+              ) : (
+                <p className="text-xs leading-6 md:text-[13px]">{"未上传时使用站点默认 16:9 底图。"}</p>
+              )}
+            </div>
+          </fieldset>
+
+          <div className="h-px bg-gradient-to-r from-transparent via-[#7C3AED]/15 to-transparent" />
+
+          <fieldset className="space-y-3">
+            <legend className="mb-2 inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#7C3AED]">
+              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#7C3AED]/10 text-[10px] font-bold text-[#7C3AED]">
+                3
+              </span>
+              安全校验
+            </legend>
+            <label htmlFor="alumni-captcha" className="block text-sm font-medium text-[#4C1D95]">
+              {`请回答：${numA} + ${numB} = ?`}
+            </label>
+            <input
+              id="alumni-captcha"
+              type="text"
+              tabIndex={0}
+              aria-label="安全校验答案"
+              inputMode="numeric"
+              value={captchaInput}
+              onChange={(event) => setCaptchaInput(event.target.value)}
+              placeholder="请输入计算结果"
+              className="input w-full"
+            />
+
+            <div className="rounded-xl border border-[#7C3AED]/15 bg-gradient-to-br from-[#FAF5FF] to-white px-4 py-3 text-sm">
+              <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-[#7C3AED]/70">
+                Certificate No.
+              </p>
+              <p className="font-heading mt-1 truncate text-base font-semibold text-[#7C3AED]">
+                {certificateNo}
+              </p>
+            </div>
+          </fieldset>
+
+          <div className="space-y-2 pt-1">
+            <button
+              type="button"
+              onClick={handleGenerate}
+              disabled={isRendering}
+              className={`btn-primary w-full justify-center transition-all ${
+                isSuccess
+                  ? "scale-[1.02] bg-emerald-500 hover:bg-emerald-600 shadow-md"
+                  : ""
+              } ${isRendering ? "cursor-not-allowed opacity-75 animate-pulse" : ""}`}
+            >
+              {isSuccess ? <CheckCircle2 size={18} /> : <Rocket size={18} />}
+              <span>
+                {isRendering
+                  ? "身份核验中…"
+                  : isSuccess
+                    ? "生成成功"
+                    : "核验并生成纪念卡"}
+              </span>
+            </button>
+
+            <Link href="/" className="btn-secondary w-full justify-center">
+              {"返回首页"}
+            </Link>
+          </div>
+        </aside>
+
+        {/* 预览区 — 加证书外框与说明 */}
+        <div className="rounded-3xl border border-[#7C3AED]/12 bg-white p-5 shadow-[0_6px_24px_-12px_rgba(124,58,237,0.18)] md:p-6">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-[#7C3AED]/70">
+                Preview
+              </p>
+              <p className="mt-0.5 text-sm font-medium text-[#4C1D95] md:text-[15px]">
+                {isSuccess
+                  ? "纪念卡生成完毕，长按或右键即可保存。"
+                  : "实时预览 · 校验通过后将刷新最终编号"}
+              </p>
+            </div>
+            <span className="hidden rounded-full border border-[#7C3AED]/20 bg-[#FAF5FF] px-3 py-1 text-[11px] font-medium tracking-wide text-[#7C3AED] md:inline-flex">
+              16 : 9 · 2752 × 1548
+            </span>
+          </div>
+
+          <div
+            className={`relative mx-auto w-full max-w-[920px] overflow-hidden rounded-2xl border border-[#7C3AED]/20 bg-gradient-to-br from-[#FAF5FF] via-white to-[#F3E8FF] p-2 shadow-inner transition-opacity duration-500 md:p-3 ${
+              isPreviewVisible ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            <div className="overflow-hidden rounded-xl border border-[#7C3AED]/15 bg-white">
+              {previewDataUrl ? (
+                <NextImage
+                  src={previewDataUrl}
+                  alt="电子纪念卡预览"
+                  width={CANVAS_WIDTH}
+                  height={CANVAS_HEIGHT}
+                  unoptimized
+                  sizes="(max-width: 768px) 100vw, 600px"
+                  className={`mx-auto block aspect-video h-auto w-full max-w-[600px] transition duration-500 ${isSuccess ? "scale-[1.02]" : "scale-100"}`}
+                />
+              ) : (
+                <div className="mx-auto aspect-video w-full max-w-[600px] animate-pulse bg-[#F3E8FF]" />
+              )}
             </div>
           </div>
 
-          <canvas ref={canvasRef} width={CANVAS_WIDTH} height={CANVAS_HEIGHT} className="hidden" />
+          <p className="mt-4 text-center text-[11px] leading-5 text-[#5B21B6]/55 md:text-xs">
+            {"本卡片仅为个人公益平台生成之纪念凭证，不具备任何官方效力。"}
+          </p>
         </div>
       </div>
+
+      <canvas ref={canvasRef} width={CANVAS_WIDTH} height={CANVAS_HEIGHT} className="hidden" />
     </section>
   );
 }
