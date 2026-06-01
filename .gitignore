@@ -19,9 +19,15 @@ prod.db-wal
 # Editor tooling
 .opencode/
 
+# Generated code
 /src/generated/prisma
 .claude/
+
+# Production data (never commit)
 prod.db
 public/uploads/
 data/
 data/backups/
+
+# Allow source code data directory
+!src/data/

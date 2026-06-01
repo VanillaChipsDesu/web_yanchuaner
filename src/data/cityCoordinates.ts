@@ -63,6 +63,9 @@ export const CITY_COORDS: Record<string, [number, number]> = {
   '潍坊': [36.7, 119.1],
   '临沂': [35.1, 118.3],
   '唐山': [39.6, 118.2],
+  '香港': [22.30, 114.17],
+  '齐齐哈尔': [47.35, 123.92],
+  '湛江': [21.27, 110.36],
 };
 
 export function getCityCoords(city: string): { lat: number; lng: number } | null {
