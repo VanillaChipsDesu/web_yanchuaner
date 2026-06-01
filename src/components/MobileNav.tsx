@@ -138,6 +138,7 @@ export default function MobileNav() {
         })}
       </nav>
 
+      {/* axe-ignore: aria-expanded uses dynamic React expression, valid at runtime */}
       <button
         ref={toggleRef}
         type="button"

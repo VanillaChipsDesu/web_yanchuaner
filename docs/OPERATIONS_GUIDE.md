@@ -187,6 +187,7 @@ cp /var/www/alumni-site/data/prod.db "/var/www/alumni-site/backups/prod.db.$(dat
 | `scripts/build_list.js` | 构建列表文件 | 生成静态数据文件 |
 | `scripts/clean.sh` | 清理构建产物 | 清除 `.next`、缓存等 |
 | `scripts/gen_cert_numbers.js` | 批量生成证书编号 | 新增校友后统一编号 |
+| `scripts/backup.sh` | 自动备份数据库与上传文件 | 配合 cron 定时执行 |
 
 ### 烟雾测试（smoke-test.js）
 

@@ -1,93 +1,150 @@
-# 燕川中学校友数字母港
+# 燕川中学校友数字母港 (Yanzhong Alumni Hub)
 
 <p align="left">
   <img src="https://img.shields.io/badge/Next.js-14.2-black?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js" />
   <img src="https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
-  <img src="https://img.shields.io/badge/Prisma-SQLite-2D3748?style=for-the-badge&logo=prisma&logoColor=white" alt="Prisma SQLite" />
+  <img src="https://img.shields.io/badge/Prisma-7.x-2D3748?style=for-the-badge&logo=prisma&logoColor=white" alt="Prisma" />
+  <img src="https://img.shields.io/badge/SQLite-3-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite" />
   <img src="https://img.shields.io/badge/TailwindCSS-3.4-38B2AC?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS" />
+  <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License" />
 </p>
 
-公益、非官方的深圳市燕川中学校友会数字平台。仓库包含 Next.js 14 前端、Prisma + SQLite 数据层、HMAC 鉴权、Sharp 图像处理与后台管理能力。
+公益、非官方的深圳市燕川中学校友会数字平台。基于 Next.js 14 App Router、Prisma + SQLite 数据层、HMAC 鉴权、Sharp 图像处理与后台管理能力构建。
 
 > 面向校友、在校生和管理员的公益站点，提供新闻、活动、电子校友证、校园记忆、故事投稿、校友名单、审核与后台管理等功能。
+
+## 目录
+
+- [核心能力](#核心能力)
+- [技术栈](#技术栈)
+- [项目结构](#项目结构)
+- [快速开始](#快速开始)
+- [常用命令](#常用命令)
+- [数据模型](#数据模型)
+- [主要路由](#主要路由)
+- [部署](#部署)
+- [文档](#文档)
+- [贡献指南](#贡献指南)
+- [许可证](#许可证)
 
 ## 核心能力
 
 | 模块 | 能力 |
-|------|------|
+| --- | --- |
 | 前台 | 首页、新闻、活动、电子校友纪念卡、校园记忆、燕中故事、在校生资源站、教师频道、学校介绍、联系我们 |
 | 后台 | 新闻管理、活动管理、校友名单（CRUD/导入/导出）、修改申请审核、投稿管理、用户管理 |
-| 数据 | Prisma + SQLite，本地开发和线上生产均使用 SQLite 文件持久化 |
+| 数据 | Prisma 7.x + SQLite，本地开发和线上生产均使用 SQLite 文件持久化 |
 | 认证 | 普通访问口令（httpOnly cookie）+ 管理员登录（HMAC-SHA256 token），各自独立鉴权 |
 | 图片 | 管理员上传新闻/活动封面、校友纪念卡背景图上传、服务端 Sharp 裁切与格式转换 |
 | 地图 | 校友大学城市分布（Leaflet 地图 + 城市聚合统计 + 校友明细） |
-| 安全 | API 限流、CSV 导出防公式注入、httpOnly cookie、凭据脚本一键轮换 |
+| 安全 | API 限流（内存/Redis）、CSV 导出防公式注入、httpOnly cookie、凭据脚本一键轮换、honeypot 反爬虫 |
+
+## 技术栈
+
+| 层级 | 技术 | 版本 |
+| --- | --- | --- |
+| 框架 | Next.js (App Router, standalone output) | 14.2 |
+| 语言 | TypeScript | 5.x |
+| ORM | Prisma | 7.x |
+| 数据库 | SQLite (better-sqlite3) | 3 |
+| 样式 | Tailwind CSS | 3.4 |
+| 地图 | Leaflet + react-leaflet | 1.9.4 |
+| 图像处理 | Sharp | 0.34 |
+| 认证 | HMAC-SHA256 + httpOnly cookie | — |
+| 部署 | systemd + Nginx + Let's Encrypt | — |
 
 ## 项目结构
 
-```
-src/
-├── app/
-│   ├── page.tsx                    # 首页
-│   ├── about/                      # 学校介绍
-│   ├── news/                       # 新闻列表与详情
-│   ├── events/                     # 活动列表与详情
-│   ├── contact/                    # 联系我们
-│   ├── teachers/                   # 教师频道
-│   ├── students/                   # 在校生资源站（5 个子页面）
-│   ├── alumni/
-│   │   ├── certificate/            # 电子校友纪念卡
-│   │   ├── university-map/         # 校友大学城市分布地图
-│   │   ├── radar/                  # 重定向至 university-map
-│   │   ├── memories/               # 校园记忆展览
-│   │   ├── stories/                # 燕中故事浏览与投稿
-│   │   └── correction/             # 校友信息修改申请
-│   ├── admin/                      # 后台管理（12 个页面）
-│   ├── api/                        # API 路由（31 个端点）
-│   ├── globals.css                 # 全局样式
-│   ├── layout.tsx                  # 根布局
-│   └── loading.tsx                 # 全局加载页
-├── components/                     # 通用组件（12 个）
-├── data/                           # 静态数据（城市坐标、故事、记忆等 6 个文件）
-└── lib/                            # 工具库（缓存、限流、认证、图片处理等 7 个模块）
-prisma/                             # Prisma schema
-prisma.config.ts                    # Prisma 7.x 数据源配置
-scripts/                            # 运维脚本（构建、种子数据、烟雾测试、凭据管理等）
-docs/                               # 项目文档（8 个文件）
+```text
+aerospace-alumni-site/
+├── src/
+│   ├── app/                          # Next.js App Router
+│   │   ├── page.tsx                  # 首页
+│   │   ├── layout.tsx                # 根布局
+│   │   ├── globals.css               # 全局样式
+│   │   ├── about/                    # 学校介绍
+│   │   ├── news/                     # 新闻列表/详情
+│   │   ├── events/                   # 活动列表/详情/报名
+│   │   ├── contact/                  # 联系我们
+│   │   ├── teachers/                 # 教师频道
+│   │   ├── students/                 # 在校生资源站（5 个子页）
+│   │   ├── alumni/                   # 校友相关（证书、地图、记忆、故事、修改申请）
+│   │   ├── admin/                    # 后台管理（12 个页面）
+│   │   └── api/                      # API 路由（31 个端点）
+│   ├── components/                   # React 通用组件
+│   ├── data/                         # 静态数据（城市坐标等）
+│   ├── lib/                          # 工具库（auth、cache、rate-limit、image-pipeline）
+│   └── middleware.ts                 # 路由中间件（认证）
+├── prisma/
+│   └── schema.prisma                 # 数据模型定义
+├── prisma.config.ts                  # Prisma 7.x 数据源配置
+├── public/                           # 静态资源（图片、Leaflet 图标）
+├── scripts/                          # 运维脚本
+├── docs/                             # 项目文档
+├── .env.example                      # 环境变量模板
+├── credentials.example.json          # 凭据脚本模板
+├── Dockerfile                        # Docker 多阶段构建
+├── docker-compose.yml                # Docker Compose 编排
+├── next.config.mjs                   # Next.js 配置
+├── tailwind.config.ts                # Tailwind 配置
+└── package.json
 ```
 
 ## 快速开始
 
+### 系统要求
+
+- Node.js 20+ 或 22+
+- npm 10+
+- Git
+- 推荐 WSL/Linux 进行生产构建（Windows 下 `next build` 不完全兼容）
+
+### 安装与启动
+
 ```bash
-npm install
+git clone https://github.com/yanchuaner/web_yanchuaner.git
+cd web_yanchuaner
+
+# 1. 安装依赖（严格按 lockfile）
+npm ci
+
+# 2. 配置环境变量
 cp .env.example .env
+# 编辑 .env，填入凭据（参考 docs/OPERATIONS_GUIDE.md）
+
+# 3. 初始化数据库
 npx prisma generate
 npx prisma db push
+
+# 4. 启动开发服务器
 npm run dev
 ```
 
-本地默认访问：
+打开 [http://localhost:3000](http://localhost:3000) 即可。
 
-- 首页：<http://localhost:3000>
-- 管理员登录：<http://localhost:3000/admin/login>
-- 电子校友纪念卡：<http://localhost:3000/alumni/certificate>
-- 校友地图：<http://localhost:3000/alumni/university-map>
+### 默认入口
+
+- 首页：[http://localhost:3000](http://localhost:3000)
+- 管理员登录：[http://localhost:3000/admin/login](http://localhost:3000/admin/login)
+- 电子校友纪念卡：[http://localhost:3000/alumni/certificate](http://localhost:3000/alumni/certificate)
+- 校友地图：[http://localhost:3000/alumni/university-map](http://localhost:3000/alumni/university-map)
 
 ## 常用命令
 
 | 命令 | 作用 |
-|------|------|
+| --- | --- |
 | `npm run dev` | 启动开发服务器（localhost:3000） |
 | `npm run build` | 生产构建（standalone 模式） |
 | `npm run start` | 启动生产服务 |
 | `npm run lint` | ESLint 静态检查 |
-| `node scripts/smoke-test.js` | 关键路径回归测试（认证、后台流程） |
-| `node scripts/set-credentials.js` | 一键更新访问口令和管理员账号密码 |
-| `node scripts/gen_cert_numbers.js` | 批量生成校友证书编号 |
 | `npx prisma db push` | 同步数据库 schema |
 | `npx prisma studio` | 打开 Prisma 数据库浏览器 |
+| `node scripts/smoke-test.js` | 关键路径回归测试 |
+| `node scripts/set-credentials.js` | 一键更新访问口令和管理员账号密码 |
+| `node scripts/gen_cert_numbers.js` | 批量生成校友证书编号 |
+| `bash scripts/backup.sh` | 备份数据库 + 上传文件 |
 
-## 30 秒修改凭证
+### 30 秒修改凭证
 
 ```bash
 cp credentials.example.json credentials.local.json
@@ -100,9 +157,9 @@ node scripts/set-credentials.js
 ## 数据模型
 
 | 模型 | 说明 | 主要字段 |
-|------|------|----------|
+| --- | --- | --- |
 | `User` | 用户 | name, contact, role(GUEST/ADMIN), status(PENDING/APPROVED) |
-| `WhitelistRoster` | 校友名单 | name, graduationClass, tags（大学\|专业\|城市） |
+| `WhitelistRoster` | 校友名单 | name, graduationClass, tags（大学\|专业\|城市）, certificateNo |
 | `News` | 新闻 | title, summary, content, imageUrl, status(DRAFT/PUBLISHED) |
 | `Event` | 活动 | title, summary, content, location, eventDate, maxAttendees, status |
 | `EventRegistration` | 活动报名 | eventId, name, contact, message |
@@ -112,7 +169,7 @@ node scripts/set-credentials.js
 ## 主要路由
 
 | 路由 | 权限 | 说明 |
-|------|------|------|
+| --- | --- | --- |
 | `/` | 普通口令 | 首页 |
 | `/about` | 公开 | 学校介绍 |
 | `/news` | 公开 | 新闻列表 |
@@ -130,7 +187,7 @@ node scripts/set-credentials.js
 
 完整路由与 API 权限说明见 [docs/ROUTES.md](docs/ROUTES.md)。
 
-## 预览与上线
+## 部署
 
 ### 本地预览
 
@@ -141,36 +198,67 @@ node .next/standalone/server.js
 
 默认监听 `PORT=3000`，可通过环境变量修改端口。
 
-### 正式上线
+### 生产部署
 
-详细流程见 [docs/DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md)。上线前检查清单：
+详细流程见 [docs/DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md)。简要步骤：
 
-1. `npm run lint` — 代码检查
-2. `npm run build` — 生产构建
-3. 备份生产数据库（参考 [docs/BACKUP_GUIDE.md](docs/BACKUP_GUIDE.md)）
-4. 发布 standalone 产物
-5. 重启 systemd 服务并通过 Nginx 对外访问
+1. WSL 中执行 `npm run build` 生成 `deploy/` 目录
+2. 上传到服务器 `/var/www/alumni-site/app`
+3. 配置 systemd 服务、Nginx 反向代理、Let's Encrypt 证书
+4. 启动 `systemctl start alumni-site`
+
+### Docker 部署
+
+```bash
+docker compose up -d
+```
+
+详见 [Dockerfile](Dockerfile) 和 [docker-compose.yml](docker-compose.yml)。
 
 ### 环境要求
 
 - 本地开发：Windows / macOS / Linux
-- 生产构建：**必须在 WSL 或 Linux 中执行**（Windows 下 `next build` 不完全兼容）
-- 生产运行：Node.js + systemd + Nginx（`output: "standalone"`）
-- 数据库：SQLite（文件存储，生产数据库路径 `/var/www/alumni-site/data/prod.db`）
+- 生产构建：**必须在 WSL 或 Linux 中执行**
+- 生产运行：Node.js 20+ + systemd + Nginx
+- 数据库：SQLite（生产路径 `/var/www/alumni-site/data/prod.db`）
+- 内存：≥ 2GB（生产构建需 4GB+，运行需 1GB+）
 
-## 文档入口
+## 文档
 
 | 文档 | 说明 |
-|------|------|
+| --- | --- |
 | [docs/README.md](docs/README.md) | 文档总览与阅读顺序 |
 | [docs/PROJECT_OVERVIEW.md](docs/PROJECT_OVERVIEW.md) | 项目结构、功能清单、技术栈、安全边界 |
 | [docs/ROUTES.md](docs/ROUTES.md) | 页面与 API 路由清单（含权限标记） |
-| [docs/ADMIN_GUIDE.md](docs/ADMIN_GUIDE.md) | 后台使用手册（新闻、活动、校友、审核等操作步骤） |
+| [docs/ADMIN_GUIDE.md](docs/ADMIN_GUIDE.md) | 后台使用手册（操作步骤） |
 | [docs/OPERATIONS_GUIDE.md](docs/OPERATIONS_GUIDE.md) | 本地开发、环境变量、脚本、数据库操作 |
-| [docs/DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md) | 构建流程、WSL 构建、systemd、Nginx、HTTPS |
+| [docs/DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md) | 构建、部署、Nginx、HTTPS、systemd |
 | [docs/BACKUP_GUIDE.md](docs/BACKUP_GUIDE.md) | 备份策略、恢复流程、离线备份 |
 | [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) | 常见问题排查与修复方案 |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | 贡献指南 |
+| [CHANGELOG.md](CHANGELOG.md) | 版本变更记录 |
 
-## 许可证与说明
+## 贡献指南
 
-本项目为校友会公益展示平台，非官方发布，不用于商业用途。
+欢迎贡献！在提交 Pull Request 前请阅读 [CONTRIBUTING.md](CONTRIBUTING.md)。
+
+简要流程：
+
+1. Fork 本仓库
+2. 创建特性分支 (`git checkout -b feat/awesome-feature`)
+3. 提交变更 (`git commit -m 'feat: add awesome feature'`)
+4. 推送分支 (`git push origin feat/awesome-feature`)
+5. 创建 Pull Request
+
+## 许可证
+
+本项目采用 [MIT License](LICENSE)，可自由用于学习和非商业用途。本项目为校友会公益展示平台，非官方发布，不用于商业用途。
+
+## 致谢
+
+感谢所有平台共建者的贡献。本项目纯公益，不涉及任何商业利益。
+
+---
+
+**项目地址**：[https://github.com/yanchuaner/web_yanchuaner](https://github.com/yanchuaner/web_yanchuaner)
+**线上站点**：[https://yanchuaner.cn](https://yanchuaner.cn)

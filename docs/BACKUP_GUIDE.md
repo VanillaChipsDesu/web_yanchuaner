@@ -9,7 +9,55 @@
 
 ---
 
-## 备份命令
+## 自动化备份（推荐）
+
+项目提供 `scripts/backup.sh`，配合 crontab 实现定时备份。
+
+### 部署到服务器
+
+```bash
+# 1. 复制脚本
+sudo cp /var/www/alumni-site/app/scripts/backup.sh /var/www/alumni-site/backups/
+sudo chmod +x /var/www/alumni-site/backups/backup.sh
+
+# 2. 配置 crontab
+crontab -e
+```
+
+添加以下行：
+
+```
+# 每小时备份数据库（保留 24h）
+0 * * * * /var/www/alumni-site/backups/backup.sh hourly
+
+# 每天 02:30 完整备份（保留 30 天）
+30 2 * * * /var/www/alumni-site/backups/backup.sh daily
+
+# 每周日 03:00 周备份（保留 90 天）
+0 3 * * 0 /var/www/alumni-site/backups/backup.sh weekly
+```
+
+保存退出后 cron 自动生效。验证：
+
+```bash
+crontab -l
+```
+
+### 备份保留策略
+
+脚本自动清理：
+
+| 级别 | 频率 | 保留期 | 内容 |
+| --- | --- | --- | --- |
+| hourly | 每小时 | 24 小时 | 数据库快照 |
+| daily | 每日 | 30 天 | 数据库 + 上传文件 |
+| weekly | 每周 | 90 天 | 数据库 + 上传文件 |
+
+---
+
+## 手动备份命令
+
+
 
 ### 一键完整备份
 

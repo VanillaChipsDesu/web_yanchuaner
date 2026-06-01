@@ -1,41 +1,108 @@
 # 文档索引
 
-这里是燕川中学校友数字母港项目的文档入口。建议先看这份索引，再按需要进入具体主题文档。
+燕川中学校友数字母港项目的文档入口。建议先看这份索引，再按需要进入具体主题文档。
 
 ## 推荐阅读顺序
 
+按照角色不同选择阅读路径：
+
+### 新加入的开发者
+
 1. [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md) — 项目定位、功能边界、技术栈、目录结构
 2. [ROUTES.md](ROUTES.md) — 全部页面路由、API 路由、权限机制
-3. [OPERATIONS_GUIDE.md](OPERATIONS_GUIDE.md) — 本地开发、环境变量、数据库操作、脚本说明
-4. [ADMIN_GUIDE.md](ADMIN_GUIDE.md) — 后台功能操作手册（新闻、活动、校友、审核等）
-5. [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) — 构建、部署、Nginx、HTTPS、systemd
-6. [BACKUP_GUIDE.md](BACKUP_GUIDE.md) — 备份策略、恢复流程、离线备份
-7. [TROUBLESHOOTING.md](TROUBLESHOOTING.md) — 常见问题排查与修复
+3. [OPERATIONS_GUIDE.md](OPERATIONS_GUIDE.md) — 本地开发、环境变量、数据库操作
+4. [TROUBLESHOOTING.md](TROUBLESHOOTING.md) — 遇到问题先看这里
+
+### 后台管理员
+
+1. [ADMIN_GUIDE.md](ADMIN_GUIDE.md) — 后台功能操作手册
+2. [BACKUP_GUIDE.md](BACKUP_GUIDE.md) — 备份与恢复
+3. [TROUBLESHOOTING.md](TROUBLESHOOTING.md) — 常见问题
+
+### 运维负责人
+
+1. [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) — 完整部署流程
+2. [BACKUP_GUIDE.md](BACKUP_GUIDE.md) — 数据备份策略
+3. [OPERATIONS_GUIDE.md](OPERATIONS_GUIDE.md) — 服务器运维
+
+### 贡献者
+
+1. [../CONTRIBUTING.md](../CONTRIBUTING.md) — 贡献指南
+2. [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md) — 架构理解
+3. [ROUTES.md](ROUTES.md) — 路由设计
 
 ## 文档分工
 
-| 文档 | 用途 | 适合谁看 |
-|------|------|----------|
-| [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md) | 项目结构与功能概览 | 新成员、接手维护者 |
-| [ROUTES.md](ROUTES.md) | 页面与 API 路由及权限清单 | 前后端开发、测试、运维 |
-| [OPERATIONS_GUIDE.md](OPERATIONS_GUIDE.md) | 本地开发、环境变量、脚本、数据库操作 | 开发者、运维人员 |
-| [ADMIN_GUIDE.md](ADMIN_GUIDE.md) | 后台功能操作手册（含增删改查步骤） | 管理员、运营人员、测试 |
-| [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) | 构建流程、生产部署、Nginx/HTTPS 配置 | 运维、发布负责人 |
-| [BACKUP_GUIDE.md](BACKUP_GUIDE.md) | 数据库与上传文件的备份和恢复流程 | 运维、管理员 |
-| [TROUBLESHOOTING.md](TROUBLESHOOTING.md) | 项目遇到过的问题排查与修复方案 | 开发者、运维 |
+| 文档 | 用途 | 适合谁看 | 更新频率 |
+| --- | --- | --- | --- |
+| [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md) | 项目结构与功能概览 | 新成员、接手维护者 | 项目结构变更时 |
+| [ROUTES.md](ROUTES.md) | 页面与 API 路由清单 | 前后端开发、测试、运维 | 路由变更时 |
+| [OPERATIONS_GUIDE.md](OPERATIONS_GUIDE.md) | 本地开发、脚本、数据库 | 开发者、运维 | 环境/脚本变更时 |
+| [ADMIN_GUIDE.md](ADMIN_GUIDE.md) | 后台功能操作手册 | 管理员、运营 | 后台功能变更时 |
+| [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) | 构建、部署、Nginx、HTTPS | 运维、发布负责人 | 部署流程变更时 |
+| [BACKUP_GUIDE.md](BACKUP_GUIDE.md) | 备份策略与恢复流程 | 运维、管理员 | 备份策略调整时 |
+| [TROUBLESHOOTING.md](TROUBLESHOOTING.md) | 问题排查与修复方案 | 全员 | 遇到新问题时 |
 
-## 当前项目要点
+## 项目要点速览
 
-- **前台模块**：首页、新闻、活动、校友证、校园记忆、燕中故事、在校生资源站、教师频道、学校介绍、联系我们
-- **后台模块**：新闻管理、活动管理、校友名单管理、修改申请审核、投稿管理、用户管理
-- **技术栈**：Next.js 14.2 (App Router) + TypeScript + Prisma (SQLite) + Tailwind CSS 3.4
-- **认证体系**：普通访问口令（httpOnly cookie）、管理员登录（HMAC-SHA256 token）
-- **部署方式**：`output: "standalone"` + systemd + Nginx，SQLite 持久化存储
+### 技术栈
+
+- **前端**：Next.js 14.2 (App Router) + TypeScript 5 + Tailwind CSS 3.4
+- **数据**：Prisma 7.x + SQLite (better-sqlite3)
+- **认证**：HMAC-SHA256 + httpOnly cookie（双层：访问口令 + 管理员）
+- **部署**：systemd + Nginx + Let's Encrypt（`output: "standalone"`）
+- **图像**：Sharp 服务端处理
+- **地图**：Leaflet 1.9.4 + react-leaflet
+
+### 模块清单
+
+**前台**：
+
+- 首页（动态、共建者展示）
+- 新闻列表/详情
+- 活动列表/详情/在线报名
+- 电子校友纪念卡（自定义背景）
+- 校友大学城市分布地图
+- 校园记忆、燕中故事
+- 在校生资源站（5 个子页）
+- 教师频道、学校介绍、联系我们
+
+**后台**：
+
+- 新闻管理（CRUD）
+- 活动管理（CRUD + 报名名单 + CSV 导出）
+- 校友名单管理（CRUD + CSV 导入/导出 + 证书编号）
+- 修改申请审核（通过/驳回）
+- 投稿管理、用户管理
+
+### 安全模型
+
+| 凭据 | 保护范围 | 实现 |
+| --- | --- | --- |
+| 普通访问口令 | 全站访问 | `ACCESS_PASSWORD_HASH` → httpOnly cookie |
+| 管理员账号 | `/admin/*`、`/api/admin/*`、上传 API | `ADMIN_USERNAME` + `ADMIN_PASSWORD_HASH` → httpOnly cookie (role=admin) |
+
+详见 [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md#安全边界) 中的「安全边界」章节。
 
 ## 维护约定
 
-- 新增页面或 API → 同步更新 [ROUTES.md](ROUTES.md)
-- 新增环境变量或修改开发流程 → 同步更新 [OPERATIONS_GUIDE.md](OPERATIONS_GUIDE.md)
-- 修改后台功能或操作流程 → 同步更新 [ADMIN_GUIDE.md](ADMIN_GUIDE.md)
-- 修改构建、部署或备份流程 → 同步更新 [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) 和 [BACKUP_GUIDE.md](BACKUP_GUIDE.md)
-- 遇到新问题并修复 → 同步更新 [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
+变更代码时同步更新文档：
+
+| 代码变更 | 需要更新的文档 |
+| --- | --- |
+| 新增页面 | [ROUTES.md](ROUTES.md) |
+| 新增 API | [ROUTES.md](ROUTES.md) |
+| 新增环境变量 | [OPERATIONS_GUIDE.md](OPERATIONS_GUIDE.md) + `.env.example` |
+| 新增脚本 | [OPERATIONS_GUIDE.md](OPERATIONS_GUIDE.md#脚本工具) |
+| 后台功能变更 | [ADMIN_GUIDE.md](ADMIN_GUIDE.md) |
+| 部署流程变更 | [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) |
+| 备份策略变更 | [BACKUP_GUIDE.md](BACKUP_GUIDE.md) |
+| 遇到新问题 | [TROUBLESHOOTING.md](TROUBLESHOOTING.md) |
+| 任何重要变更 | [../CHANGELOG.md](../CHANGELOG.md) |
+
+## 文档之外的资源
+
+- 项目根目录 [README.md](../README.md) — 项目快速开始
+- [CONTRIBUTING.md](../CONTRIBUTING.md) — 贡献流程
+- [CHANGELOG.md](../CHANGELOG.md) — 版本变更
+- [LICENSE](../LICENSE) — MIT 许可证
