@@ -94,7 +94,7 @@ export default function AlumniStoriesPage() {
   };
 
   return (
-    <section className="mx-auto w-full max-w-6xl px-4 py-10 md:px-8 md:py-12">
+    <section className="mx-auto w-full max-w-6xl px-4 py-10 pb-32 md:px-8 md:py-12 md:pb-36">
       <div className="glass-card-base p-5 md:p-8">
         <header className="flex flex-wrap items-start justify-between gap-3">
           <div>
@@ -175,7 +175,7 @@ export default function AlumniStoriesPage() {
           setIsModalOpen(true);
           setHasTriggeredMail(false);
         }}
-        className="btn-primary fixed bottom-6 right-4 z-40 px-5 py-3 shadow-lg md:bottom-8 md:right-8"
+        className="btn-primary fixed bottom-20 right-4 z-40 px-5 py-3 shadow-lg ring-1 ring-emerald-500/30 hover:ring-emerald-500/50 md:bottom-24 md:right-8"
       >
         <PenSquare size={16} />
         {"写信给母港"}

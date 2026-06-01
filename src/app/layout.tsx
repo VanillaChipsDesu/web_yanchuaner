@@ -123,7 +123,7 @@ export default function RootLayout({
               </div>
             </header>
 
-            <main id="main" className="relative z-10">{children}</main>
+            <main id="main" className="relative z-20">{children}</main>
 
             {/* 页脚 */}
             <footer className="glass relative z-10 border-t border-[#7C3AED]/10">
