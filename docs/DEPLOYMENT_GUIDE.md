@@ -258,6 +258,23 @@ certbot renew --dry-run            # 测试
 certbot renew                      # 正式续期
 ```
 
+### 配置自动备份
+
+服务器上设置 cron：
+
+```bash
+# 每小时备份数据库
+echo "0 * * * * /var/www/alumni-site/backups/backup.sh hourly" | crontab -
+
+# 或手动：每日备份（含上传文件）
+# 0 2 * * * /var/www/alumni-site/backups/backup.sh daily
+
+# 查看 cron 已生效
+crontab -l
+```
+
+备份脚本保留策略：hourly 24h、daily 30d、weekly 90d。详见 `scripts/backup.sh`。
+
 ---
 
 ## 踩坑记录
