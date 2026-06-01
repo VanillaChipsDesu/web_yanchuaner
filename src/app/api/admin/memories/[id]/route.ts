@@ -18,20 +18,22 @@ export async function PUT(
 
     const body = await req.json();
     const title = (body.title || '').trim();
-    if (!title) {
+
+    // 支持部分更新：只有传了 title 才校验非空
+    if (body.title !== undefined && !title) {
       return NextResponse.json({ error: '标题不能为空' }, { status: 400 });
     }
 
     const item = await prisma.memoryItem.update({
       where: { id },
       data: {
-        title,
-        subtitle: (body.subtitle || '').trim(),
-        description: (body.description || '').trim(),
-        imagePath: (body.imagePath || '').trim(),
-        imageAlt: (body.imageAlt || '').trim(),
-        icon: (body.icon || 'camera').trim(),
-        sortOrder: typeof body.sortOrder === 'number' ? body.sortOrder : existing.sortOrder,
+        ...(body.title !== undefined && { title }),
+        ...(body.subtitle !== undefined && { subtitle: (body.subtitle || '').trim() }),
+        ...(body.description !== undefined && { description: (body.description || '').trim() }),
+        ...(body.imagePath !== undefined && { imagePath: (body.imagePath || '').trim() }),
+        ...(body.imageAlt !== undefined && { imageAlt: (body.imageAlt || '').trim() }),
+        ...(body.icon !== undefined && { icon: (body.icon || 'camera').trim() }),
+        ...(typeof body.sortOrder === 'number' && { sortOrder: body.sortOrder }),
       },
     });
 

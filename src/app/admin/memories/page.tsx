@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { Plus, Pencil, Trash2, Camera, House, Landmark, LibraryBig, Mountain, Trees, ArrowUp, ArrowDown } from 'lucide-react';
 
 const ICONS = [
@@ -40,6 +40,8 @@ export default function AdminMemoriesPage() {
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadMsg, setUploadMsg] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchItems = useCallback(async () => {
     try {
@@ -60,6 +62,7 @@ export default function AdminMemoriesPage() {
   const resetForm = () => {
     setForm(emptyForm);
     setEditingId(null);
+    setUploadMsg('');
   };
 
   const openEdit = (item: MemoryItem) => {
@@ -121,6 +124,7 @@ export default function AdminMemoriesPage() {
     if (!file) return;
     setUploading(true);
     setError('');
+    setUploadMsg('');
     try {
       const formData = new FormData();
       formData.append('file', file);
@@ -128,6 +132,7 @@ export default function AdminMemoriesPage() {
       const data = await res.json();
       if (data.url) {
         setForm((prev) => ({ ...prev, imagePath: data.url }));
+        setUploadMsg(`已上传: ${file.name} → ${data.filename}`);
       } else {
         throw new Error(data.error || '上传失败');
       }
@@ -135,6 +140,10 @@ export default function AdminMemoriesPage() {
       setError(e.message || '上传失败');
     } finally {
       setUploading(false);
+      // 重置 file input，允许同名文件再次上传
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
@@ -228,9 +237,12 @@ export default function AdminMemoriesPage() {
               />
               <label className="btn-secondary inline-flex cursor-pointer items-center gap-1 whitespace-nowrap">
                 {uploading ? '上传中...' : '本地上传'}
-                <input type="file" accept="image/*" onChange={handleUpload} className="hidden" disabled={uploading} />
+                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleUpload} className="hidden" disabled={uploading} />
               </label>
             </div>
+            {uploadMsg && (
+              <p className="mt-1 text-xs text-green-600">{uploadMsg}</p>
+            )}
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium text-[#4C1D95]">图片说明（alt）</label>
