@@ -55,13 +55,6 @@ const coBuilders: TeamMember[] = [
     city: "南昌",
   },
   {
-    name: "张正朋",
-    role: "技术支持",
-    university: "海南大学",
-    focus: "前端交互与效能优化",
-    city: "海口",
-  },
-  {
     name: "吴桐",
     role: "内容贡献",
     university: "香港树仁大学",
@@ -69,7 +62,7 @@ const coBuilders: TeamMember[] = [
     city: "香港",
   },
   {
-    name: "杨茹",
+    name: "杨菁",
     role: "内容贡献",
     university: "广东海洋大学",
     focus: "视觉素材与文化展示",
@@ -84,16 +77,23 @@ const coBuilders: TeamMember[] = [
   },
   {
     name: "朱国震",
-    role: "核心共建",
+    role: "运维协调",
     university: "深圳技术大学",
-    focus: "技术拓展与效能提升",
+    focus: "数据维护与运营支持",
     city: "深圳",
   },
   {
+    name: "张正朋",
+    role: "通讯支持",
+    university: "海南大学",
+    focus: "社群联络与信息互通",
+    city: "海口",
+  },
+  {
     name: "张一鸣",
-    role: "技术支持",
+    role: "通讯支持",
     university: "齐齐哈尔医学院",
-    focus: "终端体验与稳定性",
+    focus: "线上互动与用户触达",
     city: "齐齐哈尔",
   },
 ];
