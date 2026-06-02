@@ -42,7 +42,7 @@
 | 校友信息修改申请 | 校友在前台搜索自己姓名提交修改申请，管理员后台审核（通过/驳回） |
 | 校友大学城市分布 | Leaflet 地图 + 城市聚合统计 + 点击展开校友明细（姓名、大学、专业、班级） |
 | 电子校友纪念卡 | 输入姓名和班级验证身份，生成专属电子纪念卡（支持自定义背景上传） |
-| 校园记忆 | 校园风景、毕业合影等文化记忆展览（静态数据驱动） |
+| 校园记忆 | 校园风景、毕业合影等文化记忆展览（数据库驱动，管理员后台可视化维护） |
 | 燕中故事 | 校友故事浏览与投稿（静态数据 + 邮箱投稿） |
 | 在校生资源站 | 5 个子页面：志愿填报参考、大学与专业观察、学长问答、学习方法、校友寄语 |
 | 教师频道 | 教师名录、名师风采、教研成果、校友联络（规划中） |
@@ -72,12 +72,13 @@
 
 ```
 model User                      # 用户（name, contact, role, status）
-model WhitelistRoster           # 校友名单（name, graduationClass, tags）
+model WhitelistRoster           # 校友名单（name, graduationClass, tags, certificateNo）
 model AlumniCorrectionRequest   # 校友信息修改申请（当前值/申请值对比, status, adminNote）
 model Post                      # 投稿（title, content, type, status, authorId）
 model News                      # 新闻（title, summary, content, imageUrl, status）
 model Event                     # 活动（title, summary, location, eventDate, maxAttendees, status）
 model EventRegistration         # 活动报名（eventId, name, contact, message）
+model MemoryItem                # 燕中记忆展品（title, subtitle, description, imagePath, imageAlt, icon, sortOrder）
 ```
 
 ### 静态数据文件
@@ -87,7 +88,7 @@ model EventRegistration         # 活动报名（eventId, name, contact, message
 | `src/data/cityCoordinates.ts` | 城市名称 → 经纬度坐标映射 |
 | `src/data/studentResources.ts` | 在校生资源站内容（志愿参考、专业观察等） |
 | `src/data/stories.json` | 燕中故事数据 |
-| `src/data/memoriesGallery.json` | 校园记忆图片数据 |
+| `src/data/memoriesGallery.json` | 燕中记忆种子数据（仅用于 `scripts/seed_memories.js` 初始化） |
 | `src/data/starMessages.ts` | 首页校友寄语数据 |
 | `src/data/alumni_encrypted.ts` | 加密的校友数据 |
 
@@ -142,9 +143,10 @@ aerospace-alumni-site/
 │   │   │   ├── events/               # 活动管理（列表 + 新建 + 编辑 + 报名名单）
 │   │   │   ├── alumni/               # 校友名单管理
 │   │   │   ├── alumni-corrections/   # 修改申请审核
+│   │   │   ├── memories/             # 燕中记忆管理
 │   │   │   ├── posts/                # 投稿管理
 │   │   │   └── users/                # 用户管理
-│   │   └── api/                      # 31 个 API 端点
+│   │   └── api/                      # 34 个 API 端点
 │   ├── components/                   # 通用组件（12 个）
 │   │   ├── AlumniSearch.tsx          # 校友搜索
 │   │   ├── AlumniMap.tsx             # 校友地图（Leaflet）
@@ -172,7 +174,9 @@ aerospace-alumni-site/
 │   │   ├── cache.ts                  # 缓存工具
 │   │   ├── redis.ts                  # Redis 客户端
 │   │   ├── rate-limit.ts             # API 限流
-│   │   └── image-pipeline.ts         # 图片处理管道（Sharp）
+│   │   ├── image-pipeline.ts         # 图片处理管道（Sharp）
+│   │   ├── tags.ts                   # Tags 解析与标准化
+│   │   └── memories.ts               # 记忆板块工具（icon→板块名 + 文件重命名）
 │   └── globals.css                   # 全局样式
 ├── prisma/
 │   └── schema.prisma                 # 数据模型定义
@@ -182,11 +186,13 @@ aerospace-alumni-site/
 │   ├── set-credentials.js            # 一键更新凭证
 │   ├── seed_content.js               # 种子内容数据
 │   ├── seed_whitelist.js             # 种子校友名单
+│   ├── seed_memories.js              # 种子燕中记忆数据
+│   ├── gen_cert_numbers.js           # 批量生成证书编号
+│   ├── backup.sh                     # 自动备份脚本
 │   ├── rebuild_roster.js             # 重建名单
 │   ├── sync_roster.js                # 同步名单
 │   ├── build_list.js                 # 构建列表
-│   ├── clean.sh                      # 清理脚本
-│   └── loadtest/                     # 压力测试（k6 + Artillery）
+│   └── clean.sh                      # 清理脚本
 ├── docs/                             # 项目文档（8 个文件）
 ├── public/                           # 静态资源（图片、上传文件）
 ├── next.config.mjs                   # Next.js 配置

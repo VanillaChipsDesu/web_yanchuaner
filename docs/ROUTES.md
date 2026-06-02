@@ -31,7 +31,7 @@
 | `/alumni/certificate` | 普通口令 | 电子校友纪念卡（姓名+班级验证，生成专属卡片） |
 | `/alumni/university-map` | 普通口令 | 校友大学城市分布地图（Leaflet + 城市聚合 + 校友明细） |
 | `/alumni/radar` | 普通口令 | 重定向至 `/alumni/university-map` |
-| `/alumni/memories` | 普通口令 | 校园记忆（风景、合影等文化记忆展览） |
+| `/alumni/memories` | 普通口令 | 燕中记忆文化长廊（数据库驱动，管理员后台可视化维护） |
 | `/alumni/stories` | 普通口令 | 燕中故事（浏览 + 邮箱投稿） |
 | `/alumni/correction` | 普通口令 | 校友信息修改申请（搜索姓名 → 提交修改） |
 
@@ -54,6 +54,7 @@
 | `/admin/events/[id]/registrations` | 管理员 | 活动报名名单（查看 + CSV 导出） |
 | `/admin/alumni` | 管理员 | 校友名单管理（CRUD + CSV 导入/导出） |
 | `/admin/alumni-corrections` | 管理员 | 校友信息修改申请审核（筛选、通过/驳回） |
+| `/admin/memories` | 管理员 | 燕中记忆管理（CRUD、排序、图片上传） |
 | `/admin/posts` | 管理员 | 投稿管理 |
 | `/admin/users` | 管理员 | 用户管理 |
 
@@ -79,6 +80,7 @@
 | `/api/events` | 公开 | GET | 公开活动列表 |
 | `/api/events/[id]` | 公开 | GET | 活动详情 |
 | `/api/posts` | 公开 | GET | 公开投稿列表 |
+| `/api/memories` | 公开 | GET | 燕中记忆展品列表（含图片存在性检查） |
 
 ### 校友 API（需普通口令或管理员）
 
@@ -114,6 +116,8 @@
 | `/api/admin/alumni-corrections` | 管理员 | GET | 修改申请列表（支持按状态筛选） |
 | `/api/admin/alumni-corrections/[id]` | 管理员 | PUT | 审核修改申请（通过并应用 / 驳回） |
 | `/api/admin/posts` | 管理员 | GET / POST | 投稿管理 |
+| `/api/admin/memories` | 管理员 | GET / POST | 燕中记忆列表 / 新建展品 |
+| `/api/admin/memories/[id]` | 管理员 | PUT / DELETE | 编辑展品（支持部分更新） / 删除展品 |
 | `/api/admin/posts/[id]` | 管理员 | PUT / DELETE | 单个投稿操作 |
 | `/api/admin/users` | 管理员 | GET | 用户列表 |
 
@@ -141,6 +145,8 @@
 
 ---
 
-## 校园记忆页面说明
+## 燕中记忆管理说明
 
-`/alumni/memories` 页面访问需要普通口令验证，但其使用的图片资源来自 `public/` 目录下的静态文件，不经过 API 鉴权。如果上传了敏感照片，应控制好图片本身的访问权限。
+`/alumni/memories` 页面需普通口令验证。展品数据来自 `MemoryItem` 数据库表，由管理员通过 `/admin/memories` 后台可视化维护（CRUD、排序、图片上传）。前台页面标记为 `force-dynamic`，管理员更新后刷新即生效。
+
+上传的展品图片存入 `public/uploads/`，保存时自动按 `{板块英文名}{排序号}.jpg` 格式重命名（板块映射：house→campus, landmark→building, library→library, mountain→playground, trees→garden, camera→album）。

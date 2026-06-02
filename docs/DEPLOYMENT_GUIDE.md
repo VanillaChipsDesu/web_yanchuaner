@@ -110,6 +110,10 @@ ln -sf /var/www/alumni-site/uploads /var/www/alumni-site/app/public/uploads
 # ========== 6. 启动服务 ==========
 systemctl start alumni-site
 systemctl status alumni-site
+
+# ========== 7. 初始化记忆展品（首次部署或需要重置时） ==========
+cd /var/www/alumni-site/app
+DATABASE_URL="file:/var/www/alumni-site/data/prod.db" node scripts/seed_memories.js
 ```
 
 ### 第四阶段：验证

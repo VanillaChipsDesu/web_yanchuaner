@@ -285,6 +285,40 @@ ls public/leaflet/
 
 如缺失，从 `https://unpkg.com/leaflet@1.9.4/dist/images/` 下载补全。
 
+### 19. 燕中记忆前台显示"IMAGE PENDING"
+
+**现象**：`/alumni/memories` 页面展品卡片显示 "IMAGE PENDING"，不显示图片
+
+**原因**：
+- 图片尚未上传到服务器
+- 图片路径指向了不存在的旧 `/memories/` 目录
+- 上传目录软链接未创建（`public/uploads` → `/var/www/alumni-site/uploads`）
+
+**修复**：
+1. 后台 `/admin/memories` 逐个展品上传图片
+2. 检查 `imagePath` 字段是否为 `/uploads/` 路径
+3. 确认 uploads 软链接：`ls -la /var/www/alumni-site/app/public/uploads`
+4. 如缺失：`ln -sf /var/www/alumni-site/uploads /var/www/alumni-site/app/public/uploads`
+
+### 20. 燕中记忆展品排序失败
+
+**现象**：点击 ↑↓ 排序按钮无效果
+
+**原因**：旧版 API 要求 PUT 请求必须包含 `title`，排序请求仅传 `sortOrder` 被拒绝
+
+**修复**：升级到 feather 分支最新代码，PUT `/api/admin/memories/[id]` 已支持部分更新。
+
+### 21. MemoryItem 表不存在 / prisma db push 失败
+
+**现象**：访问 `/api/memories` 报 500，日志显示 `no such table: MemoryItem`
+
+**修复**：
+```bash
+cd /var/www/alumni-site/app
+DATABASE_URL="file:/var/www/alumni-site/data/prod.db" npx prisma db push
+systemctl restart alumni-site
+```
+
 ---
 
 ## 快速修复流程（万能方案）

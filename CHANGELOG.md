@@ -5,7 +5,25 @@
 ## [Unreleased]
 
 ### Added
-- 标准开源项目文档：LICENSE、CONTRIBUTING、CHANGELOG
+- 燕中记忆文化长廊数据库驱动改造：新增 `MemoryItem` 模型，后台 CRUD/排序/上传管理，前台 API 动态渲染
+- 燕中记忆后台管理页 `/admin/memories`（新增/编辑/删除/上下排序/图片上传）
+- 公开 API `GET /api/memories` + 管理员 CRUD API（`/api/admin/memories`、`/api/admin/memories/[id]`）
+- 上传文件按板块规范自动重命名：`{category}{sortOrder}.jpg`（campus/building/library/playground/garden/album）
+- Tags 解析统一工具 `src/lib/tags.ts`：`parseTags()` 容错竖线和逗号两种分隔符，`normalizeTags()` 在写入时标准化
+- `src/lib/memories.ts`：icon→板块英文名映射 + 文件重命名工具
+- 种子数据脚本 `scripts/seed_memories.js`（从 `memoriesGallery.json` 导入初始数据）
+
+### Changed
+- `prisma.config.ts` 移除 `dotenv/config` 导入，提升 standalone 兼容性
+- 上传 API 文件命名改为 `时间戳-原文件名.ext`（保留原始文件名，可读性提升）
+- 燕中记忆前台页面改为 `force-dynamic` 实时渲染，不再依赖 JSON 静态文件和缓存
+
+### Fixed
+- 部署打包补全 `prisma.config.ts` 和 `scripts/` 目录
+- PUT `/api/admin/memories/[id]` 支持部分更新（sortOrder-only 排序请求不再被 title 校验拒绝）
+- 文件上传后 input 正确重置，允许同名文件重复上传
+- Tags 全链路统一解析：4 处读取（地图/城市统计/搜索/首页）+ 3 处写入（create/update/CSV 导入）
+- 移除种子数据中 `/memories/` 旧路径引用
 
 ## [1.0.0] — 2026-06-01
 

@@ -187,6 +187,7 @@ cp /var/www/alumni-site/data/prod.db "/var/www/alumni-site/backups/prod.db.$(dat
 | `scripts/build_list.js` | 构建列表文件 | 生成静态数据文件 |
 | `scripts/clean.sh` | 清理构建产物 | 清除 `.next`、缓存等 |
 | `scripts/gen_cert_numbers.js` | 批量生成证书编号 | 新增校友后统一编号 |
+| `scripts/seed_memories.js` | 初始化燕中记忆种子数据 | 首次部署或重置记忆展品 |
 | `scripts/backup.sh` | 自动备份数据库与上传文件 | 配合 cron 定时执行 |
 
 ### 烟雾测试（smoke-test.js）
@@ -219,6 +220,27 @@ node scripts/gen_cert_numbers.js
 
 - 后台 → 校友名单 → 编辑 → 证书编号输入框
 - 数据库 → `npx prisma studio` → WhitelistRoster → certificateNo 列
+
+### 燕中记忆管理（seed_memories.js）
+
+燕中记忆文化长廊使用数据库驱动，通过后台 `/admin/memories` 可视化维护。
+
+```bash
+# 初始化种子数据（6 条校园记忆展品）
+node scripts/seed_memories.js
+```
+
+**记忆展品数据结构**（`MemoryItem` 表）：
+- `title` / `subtitle` — 展品标题和副标题
+- `description` — 描述文字
+- `imagePath` — 图片路径（`/uploads/xxx.jpg`）
+- `imageAlt` — 图片无障碍说明
+- `icon` — 图标类型（camera/house/landmark/library/mountain/trees）
+- `sortOrder` — 显示排序
+
+**图片命名工具**：`src/lib/memories.ts` 提供 `renameToCategoryPath()` 在保存时将上传图片自动重命名为 `{板块英文名}{排序号}.jpg`。
+
+**Tags 解析工具**：`src/lib/tags.ts` 提供 `parseTags()` 和 `normalizeTags()`，统一处理校友 tags 中竖线 `|` 和逗号两种分隔符，所有读写路径均已覆盖。
 
 ---
 
