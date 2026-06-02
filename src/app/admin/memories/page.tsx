@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { Plus, Pencil, Trash2, Camera, House, Landmark, LibraryBig, Mountain, Trees, ArrowUp, ArrowDown } from 'lucide-react';
+import { Pencil, Trash2, Camera, House, Landmark, LibraryBig, Mountain, Trees, ArrowUp, ArrowDown } from 'lucide-react';
 
 const ICONS = [
   { value: 'camera', label: '相机（默认）', icon: Camera },

@@ -34,7 +34,8 @@ function pickIcon(iconName: MemoryIcon) {
 
 async function getMemories(): Promise<MemoryItem[]> {
   try {
-    const baseUrl = process.env.SITE_URL || 'http://localhost:3000';
+    // 内部调用 localhost 避免公网往返，生产环境 Nginx 无需参与
+    const baseUrl = `http://localhost:${process.env.PORT || 3000}`;
     const res = await fetch(`${baseUrl}/api/memories`);
     const data = await res.json();
     return data.items || [];
