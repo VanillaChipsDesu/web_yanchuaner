@@ -27,7 +27,7 @@ const txn = db.transaction(() => {
   let count = 0;
   for (let i = 0; i < memories.length; i++) {
     const m = memories[i];
-    const result = stmt.run(m.id, m.title, m.subtitle, m.description, m.imagePath, m.imageAlt || '', m.icon || 'camera', i);
+    const result = stmt.run(m.id, m.title, m.subtitle, m.description, '', m.imageAlt || '', m.icon || 'camera', i);
     if (result.changes > 0) count++;
   }
   return count;
