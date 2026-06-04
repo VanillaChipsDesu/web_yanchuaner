@@ -10,7 +10,6 @@ const openSans = Open_Sans({
   subsets: ["latin"],
   variable: "--font-open-sans",
   display: "swap",
-  adjustFontFallback: true,
 });
 
 const poppins = Poppins({
@@ -18,7 +17,6 @@ const poppins = Poppins({
   subsets: ["latin"],
   variable: "--font-poppins",
   display: "swap",
-  adjustFontFallback: true,
 });
 
 const notoSansSC = Noto_Sans_SC({
@@ -26,7 +24,6 @@ const notoSansSC = Noto_Sans_SC({
   subsets: ["latin"],
   variable: "--font-noto-sans-sc",
   display: "swap",
-  adjustFontFallback: true,
 });
 
 const SITE_URL = process.env.SITE_URL || "https://yanchuaner.cn";
