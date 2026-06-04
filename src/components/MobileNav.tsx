@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -39,8 +40,13 @@ function isActive(pathname: string, href: string) {
 export default function MobileNav() {
   const pathname = usePathname() || '/';
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const drawerRef = useRef<HTMLDivElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Esc 关闭 + Tab 焦点锁定
   useEffect(() => {
@@ -151,10 +157,10 @@ export default function MobileNav() {
         {open ? <X size={20} aria-hidden="true" /> : <Menu size={20} aria-hidden="true" />}
       </button>
 
-      {open && (
+      {open && mounted && createPortal(
         <>
           <div
-            className="fixed inset-0 z-40 bg-[#4C1D95]/30 backdrop-blur-sm lg:hidden"
+            className="fixed inset-0 z-[60] bg-[#4C1D95]/30 backdrop-blur-sm lg:hidden"
             onClick={() => setOpen(false)}
             aria-hidden="true"
           />
@@ -164,7 +170,7 @@ export default function MobileNav() {
             role="dialog"
             aria-modal="true"
             aria-label="导航菜单"
-            className="fixed right-0 top-0 z-50 flex h-full w-72 max-w-[85vw] flex-col border-l border-[#7C3AED]/15 bg-white/95 p-5 backdrop-blur-xl shadow-2xl lg:hidden"
+            className="fixed right-0 top-0 z-[60] flex h-full w-72 max-w-[85vw] flex-col border-l border-[#7C3AED]/15 bg-white/95 p-5 backdrop-blur-xl shadow-2xl lg:hidden"
           >
             <div className="mb-4 flex items-center justify-between">
               <p className="text-sm font-semibold text-[#7C3AED] font-heading">
@@ -219,7 +225,8 @@ export default function MobileNav() {
               燕中校友数字母港 · 个人公益版
             </div>
           </div>
-        </>
+        </>,
+        document.body
       )}
     </>
   );
