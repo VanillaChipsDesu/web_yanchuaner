@@ -70,7 +70,7 @@ export default async function AboutPage() {
                   <div className="absolute left-[19px] top-10 h-full w-0.5 bg-[#7C3AED]/20" />
                 )}
                 <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#7C3AED]/30 bg-[#7C3AED]/10">
-                  <span className="text-xs font-bold text-[#7C3AED]">{(t.yearLabel || '').slice(0, 2)}</span>
+                  <span className="text-xs font-bold text-[#7C3AED]">{(t.yearLabel || '').slice(2)}</span>
                 </div>
                 <div className="pt-2">
                   <span className="text-xs font-semibold text-[#7C3AED]">{t.yearLabel || ''}</span>
