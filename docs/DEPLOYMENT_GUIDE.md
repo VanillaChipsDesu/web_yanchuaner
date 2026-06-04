@@ -149,6 +149,63 @@ systemctl start alumni-site
 curl -s http://localhost:3000/api/health
 ```
 
+### 种子数据（首次部署或数据丢失时执行）
+
+```bash
+cd /var/www/alumni-site/app && node -e "
+const Database = require('better-sqlite3');
+const crypto = require('crypto');
+const db = new Database('/var/www/alumni-site/data/prod.db');
+const now = new Date().toISOString();
+function uid() { return crypto.randomUUID(); }
+
+db.exec('DELETE FROM ContentSection WHERE page IN (\"about_features\",\"about_timeline\",\"contact\",\"students\",\"teachers\")');
+db.exec('DELETE FROM Story');
+
+const d = [
+  ['about_features','航天科技特色','全国首批航天科技教育特色高中。建有深圳市中小学唯一的航天科技教育体验馆、太空探索工程实践室和航天卫星工程实践室。学生自主研发的探空火箭前海宝安飞燕一号成功发射。','','Rocket','','','',0],
+  ['about_features','大湾区核心区位','坐落于宝安区燕罗街道广田路108号，粤港澳大湾区核心地带。中共宝安县第一次党代会会址所在地，红色基因与创新精神在这里交汇。','','Globe2','','','',1],
+  ['about_features','办学理念','以立德树人、创新发展为核心，构建航天科技教育、智慧教育、个性教育三位一体的办学特色。校名燕川寓意马踏飞燕，海纳百川。','','GraduationCap','','','',2],
+  ['about_features','校园规模','占地8.7万平方米，建筑面积11万平方米，总投资11亿元。ARCHINA 2023年度最佳教育建筑TOP10。办学规模60个班，可容纳3000名高中学子。','','MapPin','','','',3],
+  ['about_features','集团办学','隶属深圳市新安中学（集团），共享优质教育集团的师资与课程资源。','','Building2','','','',4],
+  ['about_features','师资力量','正高级教师1名、高级教师25名、博士教师3名。广东省中小学智慧教育应用标杆校、宝安区首批教育数字化转型标杆学校。','','Users','','','',5],
+  ['about_timeline','学校筹建成立','事业单位登记成立，筹建名称为深圳市第十三高级中学','','History','','','2021',0],
+  ['about_timeline','正式开学','9月1日迎来首届高一学子，20个班共1000人。同年加入新安中学（集团）。','','History','','','2022',1],
+  ['about_timeline','航天特色启航','与中国航天科技国际交流中心合作，航天科技教育体验馆落成。','','History','','','2022',2],
+  ['about_timeline','崭露头角','航天科技特色项目列入宝安区重点工作；参与中国航天大会并获奖。','','History','','','2023',3],
+  ['about_timeline','建筑获奖','校园建筑获评ARCHINA年度最佳教育建筑TOP10。','','History','','','2023',4],
+  ['about_timeline','标杆之路','获评广东省中小学智慧教育应用标杆校、宝安区首批教育数字化转型标杆学校。','','History','','','2024',5],
+  ['about_timeline','数字母港启航','校友数字母港平台正式上线，为燕中人建立永久的精神家园。','','History','','','2025',6],
+  ['about_timeline','持续前行','入选广东省基础教育课程教学改革深化行动实验校、广东省中小学科学教育示范校。','','History','','','2026',7],
+  ['contact','联系邮箱','网站维护、技术反馈、内容建议或活动合作，都可以发到这里。','yanchuan_alumni@163.com','Mail','mailto:yanchuan_alumni@163.com','发送邮件','',0],
+  ['contact','校友投稿','你的燕中故事值得被记住。课堂趣事、校园回忆、成长感悟，都欢迎来稿。审核后发布。','','MessageSquare','/alumni/stories','前往燕中故事投稿','',1],
+  ['contact','活动合作','想发起校友聚会、返校日或线上分享？告诉我们你的想法，我们帮你传播。','','CalendarDays','','','',2],
+  ['students','志愿填报参考','分数、位次、城市、学校、专业——填志愿不是做选择题，是认识自己的过程。学长学姐用亲身经历帮你理清思路。','','School','/students/application-guide','','',0],
+  ['students','大学与专业观察','这个专业到底学什么？那所大学怎么样？校友们用真实体验告诉你答案。','','Building2','/students/university-insights','','',1],
+  ['students','学长问答','专业怎么选？志愿怎么填？大学怎么适应？过来人给你答案。','','HelpCircle','/students/senior-qa','','',2],
+  ['students','学习方法','时间管理、高效复习、心态调整——不是鸡汤，是真能用的干货。','','GraduationCap','/students/learning-methods','','',3],
+  ['students','校友寄语','天南海北的学长学姐，写给还在燕中的你。关于选择、努力与成长。','','Sparkles','/students/alumni-messages','','',4],
+  ['teachers','教师名录','燕川中学在职及退休教师基本信息（学科、教学特色等），由校友志愿者持续补充。','欢迎校友提供恩师资料','BookOpen','','','',0],
+  ['teachers','名师风采','展示燕川中学优秀教师的先进事迹与教学成就，传承尊师重教的校园传统。','期待你的推荐与投稿','Star','','','',1],
+  ['teachers','教研成果','公开课、课题研究、教学论文——记录老师们的专业成长与教研探索。','内容整理中','Heart','','','',2],
+  ['teachers','校友联络','想对恩师说声谢谢？通过燕中故事投稿，我们会让老师知道你的近况。','','MessageSquare','/alumni/stories','向恩师表达问候','',3],
+];
+
+const insert = db.prepare('INSERT INTO ContentSection (id, page, title, description, note, icon, href, actionLabel, yearLabel, sortOrder, createdAt, updatedAt) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)');
+for (const r of d) { insert.run(uid(), ...r, now, now); }
+console.log('ContentSection: ' + d.length);
+
+db.prepare('INSERT OR IGNORE INTO Story (id,title,author,tags,body,date,createdAt,updatedAt) VALUES (?,?,?,?,?,?,?,?)').run('story-1','写代码之前，先学会提问','黄同学 · 2022级1班 · 计算机专业','[\"专业真相\",\"避坑指南\"]','大一最容易掉的坑，就是以为课程难是最大挑战。其实真正拉开差距的，是从被动做题切换到主动定义问题。建议学弟学妹提前练习：用搜索引擎精准找到答案、看懂一篇技术文档、把模糊的需求拆成可执行的步骤。会提问的人，就已经解决了一半的问题。','2026-03-18',now,now);
+db.prepare('INSERT OR IGNORE INTO Story (id,title,author,tags,body,date,createdAt,updatedAt) VALUES (?,?,?,?,?,?,?,?)').run('story-2','停电那晚，我们把青春写进走廊','吴同学 · 2022级17班 · 新闻传播专业','[\"校园回忆\",\"青春寄语\"]','高三有天晚上突然停电，整栋教学楼只剩手电筒的微光和窗外的星光。没有人回宿舍。我们围在走廊尽头，借着应急灯背英语、背地理，也聊起十年后你想成为什么样的人。那晚我们说了很多，关于大学、关于未来、关于不想散的约定。现在回头看，那不止是一个备考的夜晚。那是我们各自起飞前，最后一次集体抬头看星空。','2026-03-26',now,now);
+db.prepare('INSERT OR IGNORE INTO Story (id,title,author,tags,body,date,createdAt,updatedAt) VALUES (?,?,?,?,?,?,?,?)').run('story-3','热门专业不等于适合你','杨同学 · 2022级14班 · 经济学专业','[\"专业真相\",\"避坑指南\"]','填志愿那会儿，我们最容易被就业率、薪资排名、听起来很厉害这些标签带偏。大学读了一年才明白：真正能让你走远的，是兴趣、能力和性格三者的交集。三个建议：1. 找在读的学长学姐聊聊，别只看招生简章；2. 去大学官网看课程表；3. 试着做一个小项目。不跟风，才能走得更稳。','2026-04-01',now,now);
+db.prepare('INSERT OR IGNORE INTO Story (id,title,author,tags,body,date,createdAt,updatedAt) VALUES (?,?,?,?,?,?,?,?)').run('story-4','从燕中到大学：这一年我学会了什么','左同学 · 2022级20班 · 设计专业','[\"青春寄语\",\"校园回忆\"]','刚上大学那阵子，最不习惯的是没人管你了。不用六点起床跑操，不用穿校服，不用被班主任盯着交作业。自由来得太突然，反而有点慌。慢慢才明白，高中三年教给我的不只是知识，更是自律。那些你以为没用的晨读、晚自习、周考，其实都在帮你长出一根脊梁骨。谢谢燕中，谢谢那个每天天没亮就爬起来的自己。','2026-05-15',now,now);
+console.log('Stories: 4');
+
+db.close();
+console.log('Seed complete.');
+"
+```
+
 ### 首次部署额外步骤
 
 ```bash
