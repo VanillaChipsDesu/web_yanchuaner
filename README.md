@@ -52,20 +52,18 @@
 | **首页总览** | **校友活动** | **星空通讯录（校友地图）** |
 | ![燕中记忆](docs/assets/screenshots/memories.webp) | ![燕中故事](docs/assets/screenshots/stories.webp) | ![电子校友证](docs/assets/screenshots/certificate.webp) |
 | **燕中记忆文化长廊** | **燕中故事** | **电子校友纪念卡** |
-| ![新闻公告](docs/assets/screenshots/news.webp) | ![后台管理](docs/assets/screenshots/admin.webp) | |
-| **新闻公告** | **后台管理** | |
+| ![新闻公告](docs/assets/screenshots/news.webp) | ![后台管理](docs/assets/screenshots/admin.webp) | ![学校介绍](docs/assets/screenshots/about.webp) |
+| **新闻公告** | **后台管理** | **学校介绍** |
 
 </div>
 
 <details>
 <summary>更多页面截图</summary>
 
-| | |
-|:---:|:---:|
-| ![学校介绍](docs/assets/screenshots/about.webp) | ![在校生资源站](docs/assets/screenshots/students.webp) |
-| **学校介绍** | **在校生资源站** |
-| ![教师频道](docs/assets/screenshots/teachers.webp) | ![联系我们](docs/assets/screenshots/contact.webp) |
-| **教师频道** | **联系我们** |
+| | | |
+|:---:|:---:|:---:|
+| ![在校生资源站](docs/assets/screenshots/students.webp) | ![教师频道](docs/assets/screenshots/teachers.webp) | ![联系我们](docs/assets/screenshots/contact.webp) |
+| **在校生资源站** | **教师频道** | **联系我们** |
 
 </details>
 
