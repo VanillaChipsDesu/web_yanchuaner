@@ -152,10 +152,11 @@ export default function UniversityMapPage() {
               <h2 className="font-heading text-lg font-semibold text-[#4C1D95]">城市排行</h2>
               <p className="mt-1 text-sm text-gray-500">按校友人数排序，点击展开详情</p>
 
-              <div className="mt-4 space-y-2">
+              <div className="mt-4 max-h-[600px] overflow-y-auto space-y-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                 {data.cities.map((city, index) => (
                   <div key={city.city} className="overflow-hidden rounded-xl border border-[#7C3AED]/10">
                     <button
+                      type="button"
                       onClick={() => toggleCity(city.city)}
                       className="flex w-full items-center gap-3 bg-white/50 px-4 py-3.5 text-left transition hover:bg-[#FAF5FF] md:gap-4 md:px-5"
                     >
