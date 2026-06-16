@@ -1,7 +1,8 @@
 'use client';
 
-import { MapContainer, TileLayer, CircleMarker, Tooltip } from 'react-leaflet';
+import { MapContainer, GeoJSON, CircleMarker, Tooltip } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+import chinaData from '@/data/china.json';
 
 type CityPoint = {
   city: string;
@@ -29,11 +30,18 @@ export default function CityMapRenderer({ cities }: { cities: CityPoint[] }) {
       zoom={4}
       scrollWheelZoom={false}
       className="h-[360px] w-full md:h-96"
-      style={{ background: '#f8f9fa' }}
+      style={{ background: '#f0edf5' }}
     >
-      <TileLayer
-        attribution='&copy; <a href="https://carto.com/">CARTO</a>'
-        url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+      <GeoJSON
+        key="china-outline"
+        data={chinaData as any}
+        style={{
+          color: '#7C3AED',
+          weight: 1.2,
+          opacity: 0.4,
+          fillColor: '#ede6f7',
+          fillOpacity: 0.5,
+        }}
       />
       {cities.map((c) => (
         <CircleMarker

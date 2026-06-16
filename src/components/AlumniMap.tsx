@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { MapPin } from 'lucide-react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, GeoJSON, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { getCityCoords } from '@/data/cityCoordinates';
+import chinaData from '@/data/china.json';
 
-// Fix default marker icons in bundler — 使用本地图标，避免 cdnjs 国内不可达
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: '/leaflet/marker-icon-2x.png',
@@ -52,11 +52,18 @@ export default function AlumniMap() {
         zoom={4}
         scrollWheelZoom={false}
         className="h-80 w-full"
-        style={{ background: '#0f172a' }}
+        style={{ background: '#0b1120' }}
       >
-        <TileLayer
-          attribution='&copy; <a href="https://carto.com/">CARTO</a>'
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+        <GeoJSON
+          key="china-outline"
+          data={chinaData as any}
+          style={{
+            color: '#22d3ee',
+            weight: 0.8,
+            opacity: 0.25,
+            fillColor: '#1e293b',
+            fillOpacity: 0.6,
+          }}
         />
         {points.map((p, i) => (
           <Marker key={i} position={[p.lat, p.lng]}>
