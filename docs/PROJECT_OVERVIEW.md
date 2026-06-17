@@ -11,6 +11,8 @@
 5. [ADMIN_GUIDE.md](ADMIN_GUIDE.md) — 管理员实际操作手册（含增删改查步骤）
 6. [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) — 构建与发布流程
 
+> 想参与前端开发？先读 [UI_GUIDE.md](UI_GUIDE.md) — 设计令牌、UI 组件与安全改样式指南。
+
 ## 项目基本信息
 
 | 项目 | 内容 |
@@ -65,6 +67,45 @@
 | 图像处理 | Sharp | 0.34 |
 | 认证 | HMAC-SHA256 + httpOnly cookie | — |
 | 部署 | systemd + Nginx + `output: "standalone"` | — |
+
+## 前端架构与组件化设计
+
+项目前端遵循「**UI 渲染**与**数据流**彻底分离」的原则，降低认知负荷，方便开源贡献者参与。新手改样式时碰不到数据与鉴权逻辑。
+
+> 📘 完整的令牌字典、组件 API 速查与「安全改样式」避坑指南见 [UI_GUIDE.md](UI_GUIDE.md)。
+
+### 1. 统一设计令牌（单一来源）
+
+颜色定义在 `src/app/globals.css` 的 `:root`，通过 `tailwind.config.ts` 暴露为语义化 Tailwind 类名（`brand` / `brand-fg` / `accent` / `surface` / `line` 等）。
+
+- 改主题色只需动 `globals.css` 一个文件，无需全局搜索十六进制色值。
+- 令牌底层用 `rgb(var(--brand-rgb) / <alpha-value>)` 格式，支持透明度修饰符（`bg-brand/10`）。
+- 圆角（`rounded-btn/card/modal`）与阴影（`shadow-sm/md/lg` 三级）同样令牌化。
+
+### 2. UI 基础组件库（`src/components/ui/`）
+
+把重复的「面条式类名」收敛为有名字的声明式组件：
+
+| 组件 | 作用 |
+|------|------|
+| `PageShell` | 页面外层容器（统一宽度与留白） |
+| `GlassCard` / `SectionHeader` | 毛玻璃卡片 / 区块标题 |
+| `PageHeader` | 页头（胶囊标签 + 标题 + 描述） |
+| `Button` / `ButtonLink` | 统一按钮（含 focus 无障碍环） |
+| `Badge` / `EmptyState` / `DisclaimerBanner` | 标签 / 空状态 / 免责声明 |
+| `cn()` | 零依赖类名合并工具 |
+
+统一从 `@/components/ui` 导入。所有组件只负责渲染，不含数据拉取逻辑。
+
+### 3. 后台数据层抽象（`useResource` + `CrudManager`）
+
+后台管理页采用统一架构，数据层与 UI 层解耦：
+
+- **`src/hooks/useResource.ts`** — 通用 CRUD Hook，封装「列表加载 + 增/改/删 + loading/saving/error」，对接 `/api/admin/*`，**不改变任何请求契约**。
+- **`src/components/admin/CrudManager.tsx`** — 字段配置驱动的通用管理组件（表单 + 列表 + 编辑态），适合纯表单型页面（如 stories、achievements）。
+- **`src/components/admin/AdminPageShell.tsx` / `AdminBreadcrumb.tsx`** — 后台页统一骨架与自动面包屑。
+
+含特殊交互的页面（memories 的 16:9 图片上传、content 的 Tab 切换、teachers/memories 的拖动排序）**只接入 `useResource` 数据层**，UI 自定义，架构仍保持一致。
 
 ## 数据模型
 
@@ -152,7 +193,9 @@ aerospace-alumni-site/
 │   │   │   ├── posts/                # 投稿管理
 │   │   │   └── users/                # 用户管理
 │   │   └── api/                      # 40+ 个 API 端点
-│   ├── components/                   # 通用组件（12 个）
+│   ├── components/                   # 通用组件
+│   │   ├── ui/                        # UI 基础组件库（PageShell/GlassCard/PageHeader/Button/Badge/EmptyState/DisclaimerBanner/cn）
+│   │   ├── admin/                     # 后台通用组件（CrudManager/AdminPageShell/AdminBreadcrumb）
 │   │   ├── AlumniSearch.tsx          # 校友搜索
 │   │   ├── AlumniMap.tsx             # 校友地图（Leaflet）
 │   │   ├── CityMapRenderer.tsx       # 城市地图渲染
@@ -160,11 +203,13 @@ aerospace-alumni-site/
 │   │   ├── JoinRequestModal.tsx      # 加入申请弹窗
 │   │   ├── EventRegistrationForm.tsx # 活动报名表单
 │   │   ├── LatestUpdatesSection.tsx  # 最新动态
-│   │   ├── CosmicBackground.tsx      # 宇宙背景装饰
+│   │   ├── CosmicBackground.tsx      # 首页氛围背景装饰
 │   │   ├── StarMarquee.tsx           # 星辰滚动
 │   │   ├── MessageOrbit.tsx          # 留言轨道
-│   │   ├── MobileNav.tsx             # 移动端导航
+│   │   ├── MobileNav.tsx             # 主导航（Mega Menu + 移动抽屉）
 │   │   └── UUIDCompat.tsx            # UUID 兼容
+│   ├── hooks/                        # 自定义 Hook
+│   │   └── useResource.ts            # 后台 CRUD 数据层 Hook
 │   ├── data/                         # 静态数据
 │   │   ├── cityCoordinates.ts        # 城市经纬度坐标
 │   │   ├── studentResources.ts       # 在校生资源内容
@@ -200,7 +245,7 @@ aerospace-alumni-site/
 │   ├── sync_roster.js                # 同步名单
 │   ├── build_list.js                 # 构建列表
 │   └── clean.sh                      # 清理脚本
-├── docs/                             # 项目文档（8 个文件）
+├── docs/                             # 项目文档（9 个文件）
 ├── public/                           # 静态资源（图片、上传文件）
 ├── next.config.mjs                   # Next.js 配置
 ├── tailwind.config.ts                # Tailwind 配置
@@ -229,6 +274,7 @@ aerospace-alumni-site/
 
 - [文档索引](README.md) — 全部文档入口与阅读顺序
 - [路由清单](ROUTES.md) — 所有页面与 API 路由及权限
+- [UI 开发指南](UI_GUIDE.md) — 设计令牌、UI 组件库、后台 CRUD 架构与安全改样式指南
 - [运营指南](OPERATIONS_GUIDE.md) — 本地开发、环境变量、数据库操作、脚本说明
 - [管理员手册](ADMIN_GUIDE.md) — 后台功能详细操作说明（含增删改查）
 - [部署指南](DEPLOYMENT_GUIDE.md) — 构建、部署、Nginx、HTTPS、systemd

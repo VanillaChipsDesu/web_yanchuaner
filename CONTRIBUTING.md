@@ -14,6 +14,7 @@
 
 - [README.md](README.md) — 项目概览和快速开始
 - [docs/PROJECT_OVERVIEW.md](docs/PROJECT_OVERVIEW.md) — 架构与技术栈
+- [docs/UI_GUIDE.md](docs/UI_GUIDE.md) — 前端开发：设计令牌、UI 组件库、安全改样式指南
 - [docs/OPERATIONS_GUIDE.md](docs/OPERATIONS_GUIDE.md) — 本地开发流程
 
 ## 开发流程
@@ -59,6 +60,7 @@ npm run dev
 - **ESLint**：提交前运行 `npm run lint`，必须 0 警告 0 错误
 - **命名**：组件 `PascalCase`，函数 `camelCase`，常量 `UPPER_SNAKE_CASE`
 - **注释**：解释「为什么」而不是「做什么」
+- **UI 与样式**：优先复用 `components/ui` 组件，颜色使用语义令牌（`text-brand`、`bg-surface/10` 等），**不要裸写十六进制色值**；新增后台 CRUD 页用 `useResource` + `CrudManager`，不要在页面里手写 `fetch`。详见 [docs/UI_GUIDE.md](docs/UI_GUIDE.md)。
 
 ### 5. 提交规范
 

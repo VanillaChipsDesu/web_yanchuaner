@@ -10,8 +10,9 @@
 
 1. [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md) — 项目定位、功能边界、技术栈、目录结构
 2. [ROUTES.md](ROUTES.md) — 全部页面路由、API 路由、权限机制
-3. [OPERATIONS_GUIDE.md](OPERATIONS_GUIDE.md) — 本地开发、环境变量、数据库操作
-4. [TROUBLESHOOTING.md](TROUBLESHOOTING.md) — 遇到问题先看这里
+3. [UI_GUIDE.md](UI_GUIDE.md) — 设计令牌、UI 组件库、后台 CRUD 架构（前端开发必读）
+4. [OPERATIONS_GUIDE.md](OPERATIONS_GUIDE.md) — 本地开发、环境变量、数据库操作
+5. [TROUBLESHOOTING.md](TROUBLESHOOTING.md) — 遇到问题先看这里
 
 ### 后台管理员
 
@@ -30,7 +31,8 @@
 1. [../CONTRIBUTING.md](../CONTRIBUTING.md) — 贡献指南
 2. [../CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md) — 行为准则
 3. [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md) — 架构理解
-4. [ROUTES.md](ROUTES.md) — 路由设计
+4. [UI_GUIDE.md](UI_GUIDE.md) — 前端开发：设计令牌、UI 组件、安全改样式指南
+5. [ROUTES.md](ROUTES.md) — 路由设计
 
 ### 安全相关
 
@@ -44,6 +46,7 @@
 | --- | --- | --- | --- |
 | [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md) | 项目结构与功能概览 | 新成员、接手维护者 | 项目结构变更时 |
 | [ROUTES.md](ROUTES.md) | 页面与 API 路由清单 | 前后端开发、测试、运维 | 路由变更时 |
+| [UI_GUIDE.md](UI_GUIDE.md) | 设计令牌、UI 组件库、后台 CRUD 架构、安全改样式 | 前端开发、贡献者 | UI 组件/令牌变更时 |
 | [OPERATIONS_GUIDE.md](OPERATIONS_GUIDE.md) | 本地开发、脚本、数据库 | 开发者、运维 | 环境/脚本变更时 |
 | [ADMIN_GUIDE.md](ADMIN_GUIDE.md) | 后台功能操作手册 | 管理员、运营 | 后台功能变更时 |
 | [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) | 构建、部署、Nginx、HTTPS | 运维、发布负责人 | 部署流程变更时 |
@@ -99,6 +102,7 @@
 | --- | --- |
 | 新增页面 | [ROUTES.md](ROUTES.md) |
 | 新增 API | [ROUTES.md](ROUTES.md) |
+| 新增 UI 组件 / 修改设计令牌 | [UI_GUIDE.md](UI_GUIDE.md) |
 | 新增环境变量 | [OPERATIONS_GUIDE.md](OPERATIONS_GUIDE.md) + `.env.example` |
 | 新增脚本 | [OPERATIONS_GUIDE.md](OPERATIONS_GUIDE.md#脚本工具) |
 | 后台功能变更 | [ADMIN_GUIDE.md](ADMIN_GUIDE.md) |

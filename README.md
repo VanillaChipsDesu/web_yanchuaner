@@ -39,6 +39,7 @@
 | 图片 | 管理员上传图片自动 16:9 裁切（Sharp），新闻/活动/记忆展品封面统一规格 |
 | 地图 | 校友大学城市分布（Leaflet 地图 + 城市聚合统计 + 校友明细） |
 | 安全 | API 限流（内存/Redis）、CSV 导出防公式注入、httpOnly cookie、凭据脚本一键轮换 |
+| 前端架构 | 统一设计令牌 + UI 组件库（`components/ui`）+ 后台数据层抽象（`useResource` + `CrudManager`），UI 与数据流分离，详见 [UI 开发指南](docs/UI_GUIDE.md) |
 
 ## 站点截图
 
@@ -99,7 +100,11 @@ aerospace-alumni-site/
 │   │   ├── alumni/                   # 校友相关（证书、地图、记忆、故事、修改申请）
 │   │   ├── admin/                    # 后台管理（含燕中记忆、故事、教师频道、内容管理）
 │   │   └── api/                      # API 路由（40+ 个端点）
-│   ├── components/                   # React 通用组件（12 个）
+│   ├── components/                   # React 通用组件
+│   │   ├── ui/                        # UI 基础组件库（GlassCard/PageHeader/Button/Badge/EmptyState 等 + 设计令牌）
+│   │   ├── admin/                     # 后台通用组件（CrudManager/AdminPageShell/AdminBreadcrumb）
+│   │   └── ...                        # 业务组件（地图、导航、弹窗等）
+│   ├── hooks/                        # 自定义 Hook（useResource：后台 CRUD 数据层）
 │   ├── data/                         # 静态数据（城市坐标、故事 JSON、种子数据）
 │   ├── lib/                          # 工具库
 │   │   ├── db.ts                     # Prisma 客户端
@@ -293,6 +298,7 @@ docker compose up -d
 | [docs/README.md](docs/README.md) | 文档总览与阅读顺序 |
 | [docs/PROJECT_OVERVIEW.md](docs/PROJECT_OVERVIEW.md) | 项目结构、功能清单、技术栈、安全边界 |
 | [docs/ROUTES.md](docs/ROUTES.md) | 页面与 API 路由清单（含权限标记） |
+| [docs/UI_GUIDE.md](docs/UI_GUIDE.md) | 设计令牌、UI 组件库、后台 CRUD 架构、安全改样式指南（前端开发必读） |
 | [docs/ADMIN_GUIDE.md](docs/ADMIN_GUIDE.md) | 后台使用手册（操作步骤） |
 | [docs/OPERATIONS_GUIDE.md](docs/OPERATIONS_GUIDE.md) | 本地开发、环境变量、脚本、数据库操作 |
 | [docs/DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md) | 构建、部署、Nginx、HTTPS、systemd |
