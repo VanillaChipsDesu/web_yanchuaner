@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Open_Sans, Poppins, Noto_Sans_SC } from "next/font/google";
 import Link from "next/link";
 import UUIDCompat from "@/components/UUIDCompat";
@@ -106,7 +107,9 @@ export default function RootLayout({
         <Gatekeeper initialIsVerified={false}>
           <JoinModalProvider>
             <UUIDCompat />
-            <JoinRequestModal />
+            <Suspense fallback={null}>
+              <JoinRequestModal />
+            </Suspense>
             <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-[#FAF5FF] to-[#F3E8FF]">
             {/* 导航栏 */}
             <header className="glass sticky top-0 z-50 border-b border-[#7C3AED]/10 transition-colors duration-300 hover:border-[#7C3AED]/20">

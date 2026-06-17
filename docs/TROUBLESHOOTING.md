@@ -336,3 +336,39 @@ systemctl restart alumni-site
    ```
 
 这能解决大多数由缓存、构建残留或进程冲突引起的问题。
+
+---
+
+## 构建阶段常见报错（WSL / Linux `next build`）
+
+### `useSearchParams` bailout — admin 页面全部预渲染失败
+
+**现象**：
+```
+⨯ useSearchParams() should be wrapped in a suspense boundary at page "/admin/xxx"
+Export encountered errors on following paths:
+    /admin/page: /admin
+    /admin/news/page: /admin/news
+    ...
+```
+
+**原因**：`JoinRequestModal`（在全局根 `layout.tsx` 中渲染）内部使用了 `useSearchParams()`。Next.js 构建时会对每个子页面（含 `/admin/*`）做静态预渲染，遍历整棵组件树时遇到 `useSearchParams` 但没有 `<Suspense>` 边界，导致所有页面 bail out。
+
+**修复**：在 `src/app/layout.tsx` 中，将 `<JoinRequestModal />` 用 `<Suspense fallback={null}>` 包裹。这样 SSR 阶段跳过弹窗组件（弹窗默认不显示，不影响静态 HTML），运行时客户端仍正常工作。
+
+### `'use client'` 必须在 `export const dynamic` 之前
+
+**现象**：
+```
+The "use client" directive must be placed before other expressions.
+Move it to the top of the file to resolve this issue.
+```
+
+**原因**：Next.js 编译器要求 `'use client'` 指令必须是文件的第一个语句。`export const dynamic = 'force-dynamic'` 是表达式，写在 `'use client'` 前面会触发此错误。
+
+**修复**：将两行顺序对调——`'use client'` 放在第一行，`export const dynamic = 'force-dynamic'` 放在第二行。
+
+### `export const dynamic` 不会从 layout 继承给子页面
+
+**注意**：在 `admin/layout.tsx` 中声明 `export const dynamic = 'force-dynamic'` **只影响 layout 组件本身**，不会自动让所有子页面跳过静态预渲染。子页面的预渲染行为是独立的。如果子页面的组件树中包含 `useSearchParams` 等 CSR hook 且没有 `<Suspense>` 边界，仍会报错。正确做法是定位并修复**根因组件**（如添加 `<Suspense>` 包裹），而不是逐个给每个 page 加 `force-dynamic`。
+
