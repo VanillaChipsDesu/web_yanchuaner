@@ -1,6 +1,7 @@
-import { BarChart3, Users, FileText, TrendingUp, Newspaper, CalendarDays, Plus } from 'lucide-react';
+import { Users, FileText, TrendingUp, Newspaper, CalendarDays, Plus } from 'lucide-react';
 import prisma from '@/lib/db';
 import { getCachedOrFetch } from '@/lib/cache';
+import { AdminPageShell } from '@/components/admin/AdminPageShell';
 
 async function getStats() {
   return getCachedOrFetch('admin:stats', 60, async () => {
@@ -48,70 +49,65 @@ export default async function AdminDashboard() {
   ];
 
   return (
-    <div>
-      <div className="mb-8 flex items-center gap-3">
-        <BarChart3 size={28} className="text-[#7C3AED]" />
-        <h2 className="text-2xl font-bold text-[#4C1D95] font-heading">控制面板</h2>
-      </div>
-
+    <AdminPageShell title="控制面板" description="平台关键指标概览与快捷入口">
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {cards.map((card) => (
           <div
             key={card.label}
-            className={`cosmic-card rounded-2xl border ${card.border} ${card.bg} p-6 transition hover:-translate-y-0.5`}
+            className={`cosmic-card rounded-card border ${card.border} ${card.bg} p-6 transition hover:-translate-y-0.5`}
           >
             <div className="flex items-center justify-between">
-              <p className="text-sm text-[#4C1D95]/60">{card.label}</p>
+              <p className="text-sm text-brand-fg/60">{card.label}</p>
               <card.icon size={22} className={card.color} />
             </div>
-            <p className="mt-3 text-4xl font-bold tracking-tight text-[#4C1D95] font-heading">
+            <p className="mt-3 text-4xl font-bold tracking-tight text-brand-fg font-heading">
               {card.value}
             </p>
           </div>
         ))}
       </div>
 
-      <div className="mt-8 rounded-2xl border border-[#7C3AED]/15 bg-white/50 p-6 backdrop-blur-sm">
-        <h3 className="text-lg font-semibold text-[#4C1D95] font-heading">快速操作</h3>
+      <div className="mt-8 rounded-card border border-brand/15 bg-surface/50 p-6 backdrop-blur-sm">
+        <h3 className="text-lg font-semibold text-brand-fg font-heading">快速操作</h3>
         <div className="mt-4 flex flex-wrap gap-3">
           <a href="/admin/users?status=PENDING"
-            className="inline-flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm text-amber-700 transition hover:bg-amber-100 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#7C3AED] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+            className="inline-flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm text-amber-700 transition hover:bg-amber-100 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
           >
             <Users size={16} />
             查看待审核用户
           </a>
           <a href="/admin/posts?status=PENDING"
-            className="inline-flex items-center gap-2 rounded-xl border border-[#7C3AED]/20 bg-[#7C3AED]/5 px-4 py-2.5 text-sm text-[#7C3AED] transition hover:bg-[#7C3AED]/10 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#7C3AED] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+            className="inline-flex items-center gap-2 rounded-xl border border-brand/20 bg-brand/5 px-4 py-2.5 text-sm text-brand transition hover:bg-brand/10 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
           >
             <FileText size={16} />
             查看待审核内容
           </a>
           <a href="/admin/news"
-            className="inline-flex items-center gap-2 rounded-xl border border-[#7C3AED]/20 bg-[#7C3AED]/5 px-4 py-2.5 text-sm text-[#7C3AED] transition hover:bg-[#7C3AED]/10 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#7C3AED] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+            className="inline-flex items-center gap-2 rounded-xl border border-brand/20 bg-brand/5 px-4 py-2.5 text-sm text-brand transition hover:bg-brand/10 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
           >
             <Newspaper size={16} />
             新闻管理
           </a>
           <a href="/admin/news/new"
-            className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white/50 px-4 py-2.5 text-sm text-[#4C1D95]/60 transition hover:border-[#7C3AED]/30 hover:text-[#7C3AED] cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#7C3AED] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+            className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-surface/50 px-4 py-2.5 text-sm text-brand-fg/60 transition hover:border-brand/30 hover:text-brand cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
           >
             <Plus size={16} />
             发布新闻
           </a>
           <a href="/admin/events"
-            className="inline-flex items-center gap-2 rounded-xl border border-[#7C3AED]/20 bg-[#7C3AED]/5 px-4 py-2.5 text-sm text-[#7C3AED] transition hover:bg-[#7C3AED]/10 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#7C3AED] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+            className="inline-flex items-center gap-2 rounded-xl border border-brand/20 bg-brand/5 px-4 py-2.5 text-sm text-brand transition hover:bg-brand/10 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
           >
             <CalendarDays size={16} />
             活动管理
           </a>
           <a href="/admin/events/new"
-            className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white/50 px-4 py-2.5 text-sm text-[#4C1D95]/60 transition hover:border-[#7C3AED]/30 hover:text-[#7C3AED] cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#7C3AED] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+            className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-surface/50 px-4 py-2.5 text-sm text-brand-fg/60 transition hover:border-brand/30 hover:text-brand cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
           >
             <Plus size={16} />
             创建活动
           </a>
         </div>
       </div>
-    </div>
+    </AdminPageShell>
   );
 }

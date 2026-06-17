@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, BookOpen, Mail, Shield, Quote } from "lucide-react";
+import { PageShell, GlassCard, PageHeader, ButtonLink } from "@/components/ui";
 
 export const metadata: Metadata = {
   title: "校友寄语",
@@ -37,15 +38,14 @@ const themes = [
 
 export default function AlumniMessagesPage() {
   return (
-    <section className="mx-auto w-full max-w-6xl px-4 py-12 md:px-8">
-      <div className="glass-card-base p-6 md:p-8">
-        <p className="inline-flex items-center gap-2 rounded-full border border-[#7C3AED]/20 bg-[#7C3AED]/10 px-3 py-1 text-xs tracking-[0.18em] text-[#7C3AED]">
-          <BookOpen size={14} /> ALUMNI MESSAGES
-        </p>
-        <h1 className="font-heading mt-3 text-3xl font-bold text-[#4C1D95] md:text-4xl">校友寄语</h1>
-        <p className="mt-2 max-w-3xl text-sm leading-7 text-gray-700 md:text-base">
-          来自天南海北的学长学姐写给学弟学妹的话。当前内容为通用整理，真实校友寄语持续征集中。
-        </p>
+    <PageShell size="default">
+      <GlassCard className="p-6 md:p-8">
+        <PageHeader
+          eyebrow="ALUMNI MESSAGES"
+          eyebrowIcon={BookOpen}
+          title="校友寄语"
+          description="来自天南海北的学长学姐写给学弟学妹的话。当前内容为通用整理，真实校友寄语持续征集中。"
+        />
 
         {/* Note */}
         <div className="mt-6 rounded-2xl border border-purple-200 bg-purple-50/50 p-4">
@@ -64,25 +64,25 @@ export default function AlumniMessagesPage() {
           {themes.map((item) => (
             <div
               key={item.title}
-              className="rounded-2xl border border-[#7C3AED]/10 bg-white/50 p-5"
+              className="rounded-2xl border border-brand/10 bg-surface/50 p-5"
             >
-              <h3 className="font-heading text-base font-semibold text-[#4C1D95]">{item.title}</h3>
+              <h3 className="font-heading text-base font-semibold text-brand-fg">{item.title}</h3>
               <p className="mt-3 text-sm leading-7 text-gray-600">{item.content}</p>
             </div>
           ))}
         </div>
 
         {/* Contribution */}
-        <div className="mt-8 rounded-2xl border border-[#7C3AED]/10 bg-[#FAF5FF] p-5">
+        <div className="mt-8 rounded-2xl border border-brand/10 bg-surface-muted p-5">
           <div className="flex items-start gap-3">
-            <div className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#7C3AED]/10">
-              <Mail size={18} className="text-[#7C3AED]" />
+            <div className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand/10">
+              <Mail size={18} className="text-brand" />
             </div>
             <div>
-              <h3 className="font-heading text-sm font-semibold text-[#4C1D95]">分享你的寄语</h3>
+              <h3 className="font-heading text-sm font-semibold text-brand-fg">分享你的寄语</h3>
               <p className="mt-1 text-xs leading-6 text-gray-600">
                 欢迎校友通过{" "}
-                <Link href="/contact" className="text-[#7C3AED] underline hover:text-[#4C1D95] transition-colors">
+                <Link href="/contact" className="text-brand underline hover:text-brand-fg transition-colors">
                   联系我们
                 </Link>{" "}
                 分享你对学弟学妹的寄语。请注明你的入学年份和想说的话，我们将在审核后发布。
@@ -108,19 +108,14 @@ export default function AlumniMessagesPage() {
 
         {/* Navigation */}
         <div className="mt-6 flex flex-wrap gap-3">
-          <Link href="/students" className="btn-secondary inline-flex items-center gap-2 text-sm">
-            <ArrowLeft size={16} />
+          <ButtonLink href="/students" variant="secondary" icon={ArrowLeft}>
             返回资源站
-          </Link>
-          <Link
-            href="/contact"
-            className="inline-flex items-center gap-2 rounded-xl border border-[#7C3AED]/20 bg-[#7C3AED]/5 px-4 py-2.5 text-sm text-[#7C3AED] transition hover:bg-[#7C3AED]/10"
-          >
-            <Mail size={16} />
+          </ButtonLink>
+          <ButtonLink href="/contact" variant="ghost">
             联系我们
-          </Link>
+          </ButtonLink>
         </div>
-      </div>
-    </section>
+      </GlassCard>
+    </PageShell>
   );
 }

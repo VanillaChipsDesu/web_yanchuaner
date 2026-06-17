@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { ArrowLeft, BookOpen, Mail, Shield } from "lucide-react";
+import { ArrowLeft, BookOpen, Shield } from "lucide-react";
+import { PageShell, GlassCard, PageHeader, ButtonLink } from "@/components/ui";
 import { guideCards } from "@/data/studentResources";
 
 export const metadata: Metadata = {
@@ -10,15 +10,14 @@ export const metadata: Metadata = {
 
 export default function ApplicationGuidePage() {
   return (
-    <section className="mx-auto w-full max-w-6xl px-4 py-12 md:px-8">
-      <div className="glass-card-base p-6 md:p-8">
-        <p className="inline-flex items-center gap-2 rounded-full border border-[#7C3AED]/20 bg-[#7C3AED]/10 px-3 py-1 text-xs tracking-[0.18em] text-[#7C3AED]">
-          <BookOpen size={14} /> APPLICATION GUIDE
-        </p>
-        <h1 className="font-heading mt-3 text-3xl font-bold text-[#4C1D95] md:text-4xl">志愿填报参考</h1>
-        <p className="mt-2 max-w-3xl text-sm leading-7 text-gray-700 md:text-base">
-          帮助在校生和家长理解高考志愿填报的核心概念与思考框架。所有信息仅供参考，具体填报请以官方发布为准。
-        </p>
+    <PageShell size="default">
+      <GlassCard className="p-6 md:p-8">
+        <PageHeader
+          eyebrow="APPLICATION GUIDE"
+          eyebrowIcon={BookOpen}
+          title="志愿填报参考"
+          description="帮助在校生和家长理解高考志愿填报的核心概念与思考框架。所有信息仅供参考，具体填报请以官方发布为准。"
+        />
 
         {/* Risk Alert */}
         <div className="mt-6 rounded-2xl border border-rose-200 bg-rose-50/50 p-4">
@@ -36,13 +35,13 @@ export default function ApplicationGuidePage() {
         {/* Guide Cards */}
         <div className="mt-8 grid gap-4 md:grid-cols-2">
           {guideCards.map((card) => (
-            <div key={card.title} className="rounded-2xl border border-[#7C3AED]/10 bg-white/50 p-5">
-              <h3 className="font-heading text-base font-semibold text-[#4C1D95]">{card.title}</h3>
+            <div key={card.title} className="rounded-2xl border border-brand/10 bg-surface/50 p-5">
+              <h3 className="font-heading text-base font-semibold text-brand-fg">{card.title}</h3>
               <p className="mt-2 text-sm leading-6 text-gray-600">{card.summary}</p>
               <ul className="mt-3 space-y-2">
                 {card.points.map((point, i) => (
                   <li key={i} className="flex items-start gap-2 text-sm leading-5 text-gray-600">
-                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#7C3AED]/40" />
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand/40" />
                     {point}
                   </li>
                 ))}
@@ -68,19 +67,14 @@ export default function ApplicationGuidePage() {
 
         {/* Navigation */}
         <div className="mt-6 flex flex-wrap gap-3">
-          <Link href="/students" className="btn-secondary inline-flex items-center gap-2 text-sm">
-            <ArrowLeft size={16} />
+          <ButtonLink href="/students" variant="secondary" icon={ArrowLeft}>
             返回资源站
-          </Link>
-          <Link
-            href="/contact"
-            className="inline-flex items-center gap-2 rounded-xl border border-[#7C3AED]/20 bg-[#7C3AED]/5 px-4 py-2.5 text-sm text-[#7C3AED] transition hover:bg-[#7C3AED]/10"
-          >
-            <Mail size={16} />
+          </ButtonLink>
+          <ButtonLink href="/contact" variant="ghost">
             联系我们
-          </Link>
+          </ButtonLink>
         </div>
-      </div>
-    </section>
+      </GlassCard>
+    </PageShell>
   );
 }

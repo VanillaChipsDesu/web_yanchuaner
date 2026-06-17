@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { Pencil, Trash2, Camera, House, Landmark, LibraryBig, Mountain, Trees, ArrowUp, ArrowDown } from 'lucide-react';
+import { useResource } from '@/hooks/useResource';
 
 const ICONS = [
   { value: 'camera', label: '相机（默认）', icon: Camera },
@@ -33,31 +34,19 @@ const emptyForm = {
 };
 
 export default function AdminMemoriesPage() {
-  const [items, setItems] = useState<MemoryItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  // 数据层托管给 useResource，对接 /api/admin/memories，契约不变。
+  const res = useResource<MemoryItem>({
+    endpoint: '/api/admin/memories',
+    listKey: 'items',
+  });
+  const items = res.items;
+  const { loading, saving, error, setError } = res;
+
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
-  const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadMsg, setUploadMsg] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const fetchItems = useCallback(async () => {
-    try {
-      const res = await fetch('/api/admin/memories');
-      const data = await res.json();
-      setItems(data.items || []);
-    } catch {
-      setError('加载失败');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchItems();
-  }, [fetchItems]);
 
   const resetForm = () => {
     setForm(emptyForm);
@@ -83,42 +72,18 @@ export default function AdminMemoriesPage() {
       setError('标题不能为空');
       return;
     }
-    setSaving(true);
-    setError('');
-    try {
-      const url = editingId
-        ? `/api/admin/memories/${editingId}`
-        : '/api/admin/memories';
-      const method = editingId ? 'PUT' : 'POST';
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || '保存失败');
-      }
-      resetForm();
-      await fetchItems();
-    } catch (e: any) {
-      setError(e.message || '保存失败');
-    } finally {
-      setSaving(false);
-    }
+    const ok = editingId
+      ? await res.update(editingId, { ...form })
+      : await res.create({ ...form });
+    if (ok) resetForm();
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm('确定删除这条记忆？')) return;
-    try {
-      const res = await fetch(`/api/admin/memories/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('删除失败');
-      await fetchItems();
-    } catch {
-      setError('删除失败');
-    }
+    await res.remove(id);
   };
 
+  // 图片上传链路：经 /api/upload 自动裁切为 16:9（2752×1548），返回 url 写入表单。
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -128,16 +93,16 @@ export default function AdminMemoriesPage() {
     try {
       const formData = new FormData();
       formData.append('file', file);
-      const res = await fetch('/api/upload', { method: 'POST', body: formData });
-      const data = await res.json();
+      const uploadRes = await fetch('/api/upload', { method: 'POST', body: formData });
+      const data = await uploadRes.json();
       if (data.url) {
         setForm((prev) => ({ ...prev, imagePath: data.url }));
         setUploadMsg(`已上传: ${file.name} → ${data.filename}`);
       } else {
         throw new Error(data.error || '上传失败');
       }
-    } catch (e: any) {
-      setError(e.message || '上传失败');
+    } catch (err: any) {
+      setError(err.message || '上传失败');
     } finally {
       setUploading(false);
       // 重置 file input，允许同名文件再次上传
@@ -155,29 +120,16 @@ export default function AdminMemoriesPage() {
     const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
     const a = items[idx];
     const b = items[swapIdx];
-    try {
-      await Promise.all([
-        fetch(`/api/admin/memories/${a.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sortOrder: b.sortOrder }),
-        }),
-        fetch(`/api/admin/memories/${b.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sortOrder: a.sortOrder }),
-        }),
-      ]);
-      await fetchItems();
-    } catch {
-      setError('排序失败');
-    }
+    await Promise.all([
+      res.update(a.id, { sortOrder: b.sortOrder }),
+      res.update(b.id, { sortOrder: a.sortOrder }),
+    ]);
   };
 
   return (
     <div>
-      <h1 className="font-heading text-xl font-bold text-[#4C1D95]">燕中记忆管理</h1>
-      <p className="mt-1 text-sm text-[#4C1D95]/60">管理文化长廊展示的校园记忆展品</p>
+      <h1 className="font-heading text-xl font-bold text-brand-fg">燕中记忆管理</h1>
+      <p className="mt-1 text-sm text-brand-fg/60">管理文化长廊展示的校园记忆展品</p>
 
       {error && (
         <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
@@ -187,13 +139,13 @@ export default function AdminMemoriesPage() {
       )}
 
       {/* Form */}
-      <div className="mt-6 rounded-xl border border-[#7C3AED]/10 bg-white p-5 shadow-sm">
-        <h2 className="mb-4 font-heading text-base font-semibold text-[#4C1D95]">
+      <div className="mt-6 rounded-card border border-brand/10 bg-surface p-5 shadow-sm">
+        <h2 className="mb-4 font-heading text-base font-semibold text-brand-fg">
           {editingId ? '编辑记忆展品' : '新增记忆展品'}
         </h2>
         <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <label className="mb-1 block text-sm font-medium text-[#4C1D95]">标题 *</label>
+            <label className="mb-1 block text-sm font-medium text-brand-fg">标题 *</label>
             <input
               type="text"
               value={form.title}
@@ -204,7 +156,7 @@ export default function AdminMemoriesPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-[#4C1D95]">副标题</label>
+            <label className="mb-1 block text-sm font-medium text-brand-fg">副标题</label>
             <input
               type="text"
               value={form.subtitle}
@@ -215,7 +167,7 @@ export default function AdminMemoriesPage() {
             />
           </div>
           <div className="md:col-span-2">
-            <label className="mb-1 block text-sm font-medium text-[#4C1D95]">描述</label>
+            <label className="mb-1 block text-sm font-medium text-brand-fg">描述</label>
             <textarea
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -225,7 +177,7 @@ export default function AdminMemoriesPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-[#4C1D95]">图片路径</label>
+            <label className="mb-1 block text-sm font-medium text-brand-fg">图片路径</label>
             <div className="flex gap-2">
               <input
                 type="text"
@@ -245,7 +197,7 @@ export default function AdminMemoriesPage() {
             )}
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-[#4C1D95]">图片说明（alt）</label>
+            <label className="mb-1 block text-sm font-medium text-brand-fg">图片说明（alt）</label>
             <input
               type="text"
               value={form.imageAlt}
@@ -256,7 +208,7 @@ export default function AdminMemoriesPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-[#4C1D95]">图标</label>
+            <label className="mb-1 block text-sm font-medium text-brand-fg">图标</label>
             <div className="flex flex-wrap gap-2">
               {ICONS.map((ic) => {
                 const Icon = ic.icon;
@@ -268,8 +220,8 @@ export default function AdminMemoriesPage() {
                     onClick={() => setForm({ ...form, icon: ic.value })}
                     className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs transition cursor-pointer ${
                       active
-                        ? 'border-[#7C3AED] bg-[#7C3AED]/10 text-[#7C3AED]'
-                        : 'border-gray-200 text-gray-500 hover:border-[#7C3AED]/30'
+                        ? 'border-brand bg-brand/10 text-brand'
+                        : 'border-gray-200 text-gray-500 hover:border-brand/30'
                     }`}
                     title={ic.label}
                     disabled={saving}
@@ -308,11 +260,11 @@ export default function AdminMemoriesPage() {
           items.map((item, idx) => (
             <div
               key={item.id}
-              className="flex flex-wrap items-center gap-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-md"
+              className="flex flex-wrap items-center gap-4 rounded-card border border-gray-200 bg-surface p-4 shadow-sm transition hover:shadow-md"
             >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <h3 className="font-heading font-semibold text-[#4C1D95]">{item.title}</h3>
+                  <h3 className="font-heading font-semibold text-brand-fg">{item.title}</h3>
                   <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] text-gray-500">
                     {item.icon}
                   </span>
@@ -326,7 +278,7 @@ export default function AdminMemoriesPage() {
                 <button
                   onClick={() => moveItem(item.id, 'up')}
                   disabled={idx === 0}
-                  className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-[#7C3AED] disabled:opacity-30 cursor-pointer"
+                  className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-brand disabled:opacity-30 cursor-pointer"
                   title="上移"
                 >
                   <ArrowUp size={16} />
@@ -334,14 +286,14 @@ export default function AdminMemoriesPage() {
                 <button
                   onClick={() => moveItem(item.id, 'down')}
                   disabled={idx === items.length - 1}
-                  className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-[#7C3AED] disabled:opacity-30 cursor-pointer"
+                  className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-brand disabled:opacity-30 cursor-pointer"
                   title="下移"
                 >
                   <ArrowDown size={16} />
                 </button>
                 <button
                   onClick={() => openEdit(item)}
-                  className="rounded-lg p-1.5 text-gray-400 hover:bg-[#7C3AED]/10 hover:text-[#7C3AED] cursor-pointer"
+                  className="rounded-lg p-1.5 text-gray-400 hover:bg-brand/10 hover:text-brand cursor-pointer"
                   title="编辑"
                 >
                   <Pencil size={16} />

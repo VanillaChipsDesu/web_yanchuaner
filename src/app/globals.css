@@ -6,12 +6,23 @@
 
 @layer base {
   :root {
-    /* Color Palette */
-    --color-primary: #7C3AED;
-    --color-secondary: #A78BFA;
-    --color-cta: #22C55E;
-    --color-background: #FAF5FF;
-    --color-text: #4C1D95;
+    /* ── 颜色令牌（设计系统单一来源）──────────────── */
+    --color-primary: #7C3AED;     /* 主色 - 紫 */
+    --color-secondary: #A78BFA;   /* 辅色 - 淡紫 */
+    --color-cta: #22C55E;         /* CTA - 绿 */
+    --color-background: #FAF5FF;  /* 页面背景 - 浅紫 */
+    --color-surface: #FFFFFF;     /* 卡片表面 - 白 */
+    --color-text: #4C1D95;        /* 主文本 - 深紫 */
+    --color-line: rgba(124, 58, 237, 0.1); /* 统一描边色 */
+
+    /* RGB 通道变量：供 Tailwind 语义令牌支持透明度修饰符（如 bg-brand/10）。
+       与上方十六进制变量保持同色，十六进制供 globals.css 内原生 CSS 使用。 */
+    --brand-rgb: 124 58 237;       /* #7C3AED */
+    --brand-soft-rgb: 167 139 250; /* #A78BFA */
+    --brand-fg-rgb: 76 29 149;     /* #4C1D95 */
+    --accent-rgb: 34 197 94;       /* #22C55E */
+    --surface-rgb: 255 255 255;    /* #FFFFFF */
+    --surface-muted-rgb: 250 245 255; /* #FAF5FF */
 
     /* Spacing Variables */
     --space-xs: 4px;
@@ -125,13 +136,11 @@
   }
 
   .glass-card-base {
-    @apply relative rounded-[12px] border border-[#7C3AED]/10 bg-white/60 backdrop-blur-xl shadow-sm p-6 transition-all duration-300 hover:border-[#7C3AED]/30 hover:shadow-[#7C3AED]/10;
+    @apply relative rounded-card border border-line bg-surface/60 backdrop-blur-xl shadow-sm p-6 transition-all duration-300 hover:border-brand/30 hover:shadow-md;
     &:focus { outline: none; }
     &:focus-visible {
-      @apply ring-2 ring-[#7C3AED] ring-offset-2 ring-offset-[#FAF5FF];
+      @apply ring-2 ring-brand ring-offset-2 ring-offset-surface-muted;
     }
-    border-radius: 12px;
-    transition: box-shadow 300ms;
   }
 }
 

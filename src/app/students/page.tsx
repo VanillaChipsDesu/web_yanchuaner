@@ -5,6 +5,7 @@ import {
   ChevronRight, Mail, Shield, Star, Heart, MessageSquare, Users, Globe2, MapPin, Rocket
 } from "lucide-react";
 import prisma from "@/lib/db";
+import { PageShell, GlassCard, PageHeader, ButtonLink, EmptyState, DisclaimerBanner } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -24,17 +25,15 @@ export default async function StudentsPage() {
   });
 
   return (
-    <section className="mx-auto w-full max-w-6xl px-4 py-12 md:px-8">
-      <div className="glass-card-base p-6 md:p-8">
-        <header className="mb-8">
-          <p className="inline-flex items-center gap-2 rounded-full border border-[#7C3AED]/20 bg-[#7C3AED]/10 px-3 py-1 text-xs tracking-[0.18em] text-[#7C3AED]">
-            <BookOpen size={14} /> STUDENTS
-          </p>
-          <h1 className="font-heading mt-3 text-3xl font-bold text-[#4C1D95] md:text-4xl">在校生资源站</h1>
-          <p className="mt-2 max-w-3xl text-sm leading-7 text-gray-700 md:text-base">
-            面向在校生和家长，整理升学参考、大学观察、学习方法、学长问答与校友寄语，帮助燕中人走出更适合自己的路。
-          </p>
-        </header>
+    <PageShell>
+      <GlassCard className="p-6 md:p-8">
+        <PageHeader
+          eyebrow="STUDENTS"
+          eyebrowIcon={BookOpen}
+          title="在校生资源站"
+          description="面向在校生和家长，整理升学参考、大学观察、学习方法、学长问答与校友寄语，帮助燕中人走出更适合自己的路。"
+          className="mb-8"
+        />
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {cards.map((c) => {
@@ -53,14 +52,14 @@ export default async function StudentsPage() {
               <Link
                 key={c.id}
                 href={href}
-                className={`group relative overflow-hidden rounded-2xl border bg-gradient-to-br ${colorClass} p-5 transition hover:shadow-lg hover:-translate-y-1`}
+                className={`group relative overflow-hidden rounded-card border bg-gradient-to-br ${colorClass} p-5 transition hover:shadow-lg hover:-translate-y-1`}
               >
                 <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-white/70 shadow-sm">
-                  <Icon size={22} className="text-[#7C3AED]" />
+                  <Icon size={22} className="text-brand" />
                 </div>
-                <h3 className="font-heading mt-4 text-lg font-semibold text-[#4C1D95]">{c.title}</h3>
+                <h3 className="font-heading mt-4 text-lg font-semibold text-brand-fg">{c.title}</h3>
                 <p className="mt-2 text-sm leading-6 text-gray-600">{c.description}</p>
-                <div className="mt-4 flex items-center gap-1 text-xs font-medium text-[#7C3AED]/70 transition group-hover:gap-1.5">
+                <div className="mt-4 flex items-center gap-1 text-xs font-medium text-brand/70 transition group-hover:gap-1.5">
                   进入 <ChevronRight size={12} />
                 </div>
               </Link>
@@ -69,26 +68,23 @@ export default async function StudentsPage() {
         </div>
 
         {cards.length === 0 && (
-          <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 py-12 text-center text-gray-400">
-            <BookOpen size={48} className="mx-auto mb-3 opacity-40" />
-            <p className="text-sm">在校生资源正在整理中，敬请期待。</p>
-          </div>
+          <EmptyState icon={BookOpen} title="在校生资源正在整理中，敬请期待。" />
         )}
 
-        <div className="mt-10 rounded-2xl border border-[#7C3AED]/10 bg-white/50 p-5">
+        <div className="mt-10 rounded-card border border-line bg-surface/50 p-5">
           <div className="flex items-start gap-3">
-            <div className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#7C3AED]/10">
-              <Mail size={20} className="text-[#7C3AED]" />
+            <div className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand/10">
+              <Mail size={20} className="text-brand" />
             </div>
             <div>
-              <h3 className="font-heading text-base font-semibold text-[#4C1D95]">补充内容或分享经验</h3>
+              <h3 className="font-heading text-base font-semibold text-brand-fg">补充内容或分享经验</h3>
               <p className="mt-1.5 text-sm leading-6 text-gray-600">
                 欢迎校友通过{" "}
-                <Link href="/alumni/stories" className="text-[#7C3AED] underline hover:text-[#4C1D95] transition-colors">
+                <Link href="/alumni/stories" className="text-brand underline hover:text-brand-fg transition-colors">
                   燕中故事
                 </Link>{" "}
                 分享你的大学经历或给学弟学妹的建议。也欢迎通过{" "}
-                <Link href="/contact" className="text-[#7C3AED] underline hover:text-[#4C1D95] transition-colors">
+                <Link href="/contact" className="text-brand underline hover:text-brand-fg transition-colors">
                   联系我们
                 </Link>{" "}
                 提供资料。
@@ -97,26 +93,16 @@ export default async function StudentsPage() {
           </div>
         </div>
 
-        <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50/50 p-5">
-          <div className="flex items-start gap-3">
-            <div className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-100">
-              <Shield size={16} className="text-amber-700" />
-            </div>
-            <div>
-              <h3 className="font-heading text-sm font-semibold text-amber-800">免责声明</h3>
-              <p className="mt-1 text-xs leading-6 text-amber-700">
-                本页面内容来自公开信息整理与校友经验沉淀，仅供在校生和家长参考，不代表燕川中学或校友会官方意见，不构成报考、录取或职业选择承诺。
-              </p>
-            </div>
-          </div>
-        </div>
+        <DisclaimerBanner title="免责声明" className="mt-4">
+          本页面内容来自公开信息整理与校友经验沉淀，仅供在校生和家长参考，不代表燕川中学或校友会官方意见，不构成报考、录取或职业选择承诺。
+        </DisclaimerBanner>
 
         <div className="mt-6 flex flex-wrap gap-3">
-          <Link href="/" className="btn-secondary inline-flex items-center gap-2 text-sm">返回首页</Link>
-          <Link href="/contact" className="inline-flex items-center gap-2 rounded-xl border border-[#7C3AED]/20 bg-[#7C3AED]/5 px-4 py-2.5 text-sm text-[#7C3AED] transition hover:bg-[#7C3AED]/10">联系我们</Link>
+          <ButtonLink href="/" variant="secondary">返回首页</ButtonLink>
+          <ButtonLink href="/contact" variant="ghost">联系我们</ButtonLink>
         </div>
-      </div>
-    </section>
+      </GlassCard>
+    </PageShell>
   );
 }
 

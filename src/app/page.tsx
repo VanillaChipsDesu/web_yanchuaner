@@ -378,24 +378,9 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <footer className="mt-8 border-t border-[#A78BFA]/20 pt-6 pb-12">
-          <div className="rounded-xl border border-amber-300/50 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800 shadow-sm">
-            声明：本站为个人发起的公益站点，非任何官方机构。全站无盈利、不收费，仅供情感连接、记忆留存与校友社区服务。
-          </div>
-          <div className="mt-6 flex flex-col items-center justify-between gap-4 text-sm text-slate-500 sm:flex-row">
-            <p>© 2025-2026 燕中校友数字母港（个人公益版）</p>
-            <a
-              href="https://beian.miit.gov.cn/"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="访问工信部备案系统"
-              tabIndex={0}
-              className="hover:text-[#7C3AED] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#7C3AED] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FAF5FF]"
-            >
-              粤ICP备2026024784号-2
-            </a>
-          </div>
-        </footer>
+        <div className="mt-8 rounded-xl border border-amber-300/50 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800 shadow-sm">
+          声明：本站为个人发起的公益站点，非任何官方机构。全站无盈利、不收费，仅供情感连接、记忆留存与校友社区服务。
+        </div>
       </div>
     </section>
   );

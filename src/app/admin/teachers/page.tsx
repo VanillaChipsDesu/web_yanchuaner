@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useState } from 'react';
 import { Pencil, Trash2, BookOpen, Star, Heart, MessageSquare, GraduationCap, Users, ArrowUp, ArrowDown } from 'lucide-react';
+import { useResource } from '@/hooks/useResource';
 
 const ICONS = [
   { value: 'BookOpen', label: '书本', icon: BookOpen },
@@ -33,28 +34,19 @@ const emptyForm = {
 };
 
 export default function AdminTeachersPage() {
-  const [sections, setSections] = useState<Section[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  // 数据层：列表加载 / 增改删 / loading / error 全部由 useResource 托管，
+  // 对接现有 /api/admin/content 接口，契约不变。
+  const res = useResource<Section>({
+    endpoint: '/api/admin/content',
+    listKey: 'sections',
+    listQuery: 'page=teachers',
+    createDefaults: { page: 'teachers' },
+  });
+  const sections = res.items;
+  const { loading, saving, error, setError } = res;
+
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
-  const [saving, setSaving] = useState(false);
-
-  const fetchSections = useCallback(async () => {
-    try {
-      const res = await fetch('/api/admin/content?page=teachers');
-      const data = await res.json();
-      setSections(data.sections || []);
-    } catch {
-      setError('加载失败');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchSections();
-  }, [fetchSections]);
 
   const resetForm = () => {
     setForm(emptyForm);
@@ -79,42 +71,15 @@ export default function AdminTeachersPage() {
       setError('标题不能为空');
       return;
     }
-    setSaving(true);
-    setError('');
-    try {
-      const url = editingId
-        ? `/api/admin/content/${editingId}`
-        : '/api/admin/content';
-      const method = editingId ? 'PUT' : 'POST';
-      const body: any = { ...form };
-      if (!editingId) body.page = 'teachers';
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || '保存失败');
-      }
-      resetForm();
-      await fetchSections();
-    } catch (e: any) {
-      setError(e.message || '保存失败');
-    } finally {
-      setSaving(false);
-    }
+    const ok = editingId
+      ? await res.update(editingId, { ...form })
+      : await res.create({ ...form });
+    if (ok) resetForm();
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm('确定删除这个版块？')) return;
-    try {
-      const res = await fetch(`/api/admin/content/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('删除失败');
-      await fetchSections();
-    } catch {
-      setError('删除失败');
-    }
+    await res.remove(id);
   };
 
   const moveItem = async (id: string, direction: 'up' | 'down') => {
@@ -125,29 +90,16 @@ export default function AdminTeachersPage() {
     const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
     const a = sections[idx];
     const b = sections[swapIdx];
-    try {
-      await Promise.all([
-        fetch(`/api/admin/content/${a.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sortOrder: b.sortOrder }),
-        }),
-        fetch(`/api/admin/content/${b.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sortOrder: a.sortOrder }),
-        }),
-      ]);
-      await fetchSections();
-    } catch {
-      setError('排序失败');
-    }
+    await Promise.all([
+      res.update(a.id, { sortOrder: b.sortOrder }),
+      res.update(b.id, { sortOrder: a.sortOrder }),
+    ]);
   };
 
   return (
     <div>
-      <h1 className="font-heading text-xl font-bold text-[#4C1D95]">教师频道管理</h1>
-      <p className="mt-1 text-sm text-[#4C1D95]/60">管理教师频道页面的版块内容和排序</p>
+      <h1 className="font-heading text-xl font-bold text-brand-fg">教师频道管理</h1>
+      <p className="mt-1 text-sm text-brand-fg/60">管理教师频道页面的版块内容和排序</p>
 
       {error && (
         <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
@@ -157,13 +109,13 @@ export default function AdminTeachersPage() {
       )}
 
       {/* Form */}
-      <div className="mt-6 rounded-xl border border-[#7C3AED]/10 bg-white p-5 shadow-sm">
-        <h2 className="mb-4 font-heading text-base font-semibold text-[#4C1D95]">
+      <div className="mt-6 rounded-card border border-brand/10 bg-surface p-5 shadow-sm">
+        <h2 className="mb-4 font-heading text-base font-semibold text-brand-fg">
           {editingId ? '编辑版块' : '新增版块'}
         </h2>
         <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <label className="mb-1 block text-sm font-medium text-[#4C1D95]">标题 *</label>
+            <label className="mb-1 block text-sm font-medium text-brand-fg">标题 *</label>
             <input
               type="text"
               value={form.title}
@@ -174,7 +126,7 @@ export default function AdminTeachersPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-[#4C1D95]">图标</label>
+            <label className="mb-1 block text-sm font-medium text-brand-fg">图标</label>
             <div className="flex flex-wrap gap-2">
               {ICONS.slice(0, 4).map((ic) => {
                 const Icon = ic.icon;
@@ -186,8 +138,8 @@ export default function AdminTeachersPage() {
                     onClick={() => setForm({ ...form, icon: ic.value })}
                     className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs transition cursor-pointer ${
                       active
-                        ? 'border-[#7C3AED] bg-[#7C3AED]/10 text-[#7C3AED]'
-                        : 'border-gray-200 text-gray-500 hover:border-[#7C3AED]/30'
+                        ? 'border-brand bg-brand/10 text-brand'
+                        : 'border-gray-200 text-gray-500 hover:border-brand/30'
                     }`}
                     title={ic.label}
                     disabled={saving}
@@ -200,7 +152,7 @@ export default function AdminTeachersPage() {
             </div>
           </div>
           <div className="md:col-span-2">
-            <label className="mb-1 block text-sm font-medium text-[#4C1D95]">描述</label>
+            <label className="mb-1 block text-sm font-medium text-brand-fg">描述</label>
             <textarea
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -210,7 +162,7 @@ export default function AdminTeachersPage() {
             />
           </div>
           <div className="md:col-span-2">
-            <label className="mb-1 block text-sm font-medium text-[#4C1D95]">底部备注</label>
+            <label className="mb-1 block text-sm font-medium text-brand-fg">底部备注</label>
             <input
               type="text"
               value={form.note}
@@ -221,7 +173,7 @@ export default function AdminTeachersPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-[#4C1D95]">跳转链接（可选）</label>
+            <label className="mb-1 block text-sm font-medium text-brand-fg">跳转链接（可选）</label>
             <input
               type="text"
               value={form.href}
@@ -232,7 +184,7 @@ export default function AdminTeachersPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-[#4C1D95]">按钮文字（可选）</label>
+            <label className="mb-1 block text-sm font-medium text-brand-fg">按钮文字（可选）</label>
             <input
               type="text"
               value={form.actionLabel}
@@ -269,16 +221,16 @@ export default function AdminTeachersPage() {
           sections.map((section, idx) => (
             <div
               key={section.id}
-              className="flex flex-wrap items-center gap-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-md"
+              className="flex flex-wrap items-center gap-4 rounded-card border border-gray-200 bg-surface p-4 shadow-sm transition hover:shadow-md"
             >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <h3 className="font-heading font-semibold text-[#4C1D95]">{section.title}</h3>
+                  <h3 className="font-heading font-semibold text-brand-fg">{section.title}</h3>
                   <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] text-gray-500">
                     {section.icon}
                   </span>
                   {section.href && (
-                    <span className="rounded-full bg-[#7C3AED]/10 px-2 py-0.5 text-[10px] text-[#7C3AED]">
+                    <span className="rounded-full bg-brand/10 px-2 py-0.5 text-[10px] text-brand">
                       含链接
                     </span>
                   )}
@@ -292,7 +244,7 @@ export default function AdminTeachersPage() {
                 <button
                   onClick={() => moveItem(section.id, 'up')}
                   disabled={idx === 0}
-                  className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-[#7C3AED] disabled:opacity-30 cursor-pointer"
+                  className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-brand disabled:opacity-30 cursor-pointer"
                   title="上移"
                 >
                   <ArrowUp size={16} />
@@ -300,14 +252,14 @@ export default function AdminTeachersPage() {
                 <button
                   onClick={() => moveItem(section.id, 'down')}
                   disabled={idx === sections.length - 1}
-                  className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-[#7C3AED] disabled:opacity-30 cursor-pointer"
+                  className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-brand disabled:opacity-30 cursor-pointer"
                   title="下移"
                 >
                   <ArrowDown size={16} />
                 </button>
                 <button
                   onClick={() => openEdit(section)}
-                  className="rounded-lg p-1.5 text-gray-400 hover:bg-[#7C3AED]/10 hover:text-[#7C3AED] cursor-pointer"
+                  className="rounded-lg p-1.5 text-gray-400 hover:bg-brand/10 hover:text-brand cursor-pointer"
                   title="编辑"
                 >
                   <Pencil size={16} />

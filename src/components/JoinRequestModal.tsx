@@ -34,6 +34,13 @@ export default function JoinRequestModal() {
 
   useEffect(() => {
     setMounted(true);
+    // 支持从导航 CTA「加入我们」(/?join=1) 自动打开弹窗
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('join') === '1') {
+        setOpen(true);
+      }
+    }
   }, []);
 
   // Esc 关闭 + 焦点锁定
