@@ -15,6 +15,12 @@ deploy/
 dist/
 
 # Development database
+# 用通配规则兜底，杜绝任何 SQLite 文件（含历史误命名的备份）被提交
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
 dev.db
 dev.db-shm
 dev.db-wal
