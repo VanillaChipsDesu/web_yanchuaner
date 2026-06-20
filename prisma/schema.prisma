@@ -91,12 +91,16 @@ model WhitelistRoster {
   id              String   @id @default(uuid())
   name            String
   graduationClass String?
+  className       String?
+  email           String?
+  contact         String?
   tags            String?
   certificateNo   String?
   createdAt       DateTime @default(now())
 
   @@index([name])
   @@index([graduationClass])
+  @@index([email])
 }
 
 model AlumniCorrectionRequest {

@@ -17,7 +17,6 @@ const PUBLIC_PAGES = new Set([
   "/register",
   "/verify-email",
   "/reset-password",
-  "/admin/login",
 ]);
 
 const PUBLIC_APIS = new Set([
@@ -112,7 +111,9 @@ export async function middleware(req: NextRequest) {
     if (payload?.role === "user") {
       return NextResponse.redirect(new URL("/me", req.url));
     }
-    return next();
+    const url = new URL("/login", req.url);
+    url.searchParams.set("redirect", "/admin");
+    return NextResponse.redirect(url);
   }
 
   if (PUBLIC_PAGES.has(pathname)) {
@@ -123,11 +124,8 @@ export async function middleware(req: NextRequest) {
     if (pathname.startsWith("/api/")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    const loginPath = pathname.startsWith("/admin") ? "/admin/login" : "/login";
-    const url = new URL(loginPath, req.url);
-    if (loginPath === "/login") {
-      url.searchParams.set("redirect", `${pathname}${search}`);
-    }
+    const url = new URL("/login", req.url);
+    url.searchParams.set("redirect", `${pathname}${search}`);
     return NextResponse.redirect(url);
   }
 

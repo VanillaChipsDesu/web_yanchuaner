@@ -19,7 +19,11 @@ type AlumniItem = {
   id: string;
   name: string;
   graduationClass: string | null;
+  className: string | null;
+  email: string | null;
+  contact: string | null;
   tags: string | null;
+  certificateNo: string | null;
   createdAt: string;
 };
 
@@ -47,9 +51,16 @@ function csvEscape(val: string): string {
 }
 
 function alumniCSVContent(rows: AlumniItem[]): string {
-  const header = '姓名,届别,标签';
+  const header = '姓名,届别,班级,邮箱,联系方式,标签';
   const lines = rows.map((r) =>
-    [r.name, r.graduationClass || '', r.tags || ''].map(csvEscape).join(','),
+    [
+      r.name,
+      r.graduationClass || '',
+      r.className || '',
+      r.email || '',
+      r.contact || '',
+      r.tags || '',
+    ].map(csvEscape).join(','),
   );
   return '﻿' + header + '\n' + lines.join('\n');
 }
@@ -68,6 +79,9 @@ export default function AdminAlumniPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formName, setFormName] = useState('');
   const [formClass, setFormClass] = useState('');
+  const [formClassName, setFormClassName] = useState('');
+  const [formEmail, setFormEmail] = useState('');
+  const [formContact, setFormContact] = useState('');
   const [formTags, setFormTags] = useState('');
   const [formCertNo, setFormCertNo] = useState('');
   const [formError, setFormError] = useState('');
@@ -120,6 +134,9 @@ export default function AdminAlumniPage() {
     setEditingId(null);
     setFormName('');
     setFormClass('');
+    setFormClassName('');
+    setFormEmail('');
+    setFormContact('');
     setFormTags('');
     setFormCertNo('');
     setFormError('');
@@ -131,8 +148,11 @@ export default function AdminAlumniPage() {
     setEditingId(item.id);
     setFormName(item.name);
     setFormClass(item.graduationClass || '');
+    setFormClassName(item.className || '');
+    setFormEmail(item.email || '');
+    setFormContact(item.contact || '');
     setFormTags(item.tags || '');
-    setFormCertNo((item as any).certificateNo || '');
+    setFormCertNo(item.certificateNo || '');
     setFormError('');
     setShowForm(true);
   };
@@ -147,6 +167,21 @@ export default function AdminAlumniPage() {
     const gradClass = formClass.trim();
     if (gradClass.length > 50) {
       setFormError('届别不超过50字');
+      return;
+    }
+    const className = formClassName.trim();
+    if (className.length > 64) {
+      setFormError('班级不能超过 64 字');
+      return;
+    }
+    const email = formEmail.trim().toLowerCase();
+    if (email && (email.length > 254 || !email.includes('@'))) {
+      setFormError('邮箱格式无效');
+      return;
+    }
+    const contact = formContact.trim();
+    if (contact && !/^\d{11}$/.test(contact)) {
+      setFormError('联系方式需为11位手机号');
       return;
     }
     const tags = formTags.trim();
@@ -165,7 +200,15 @@ export default function AdminAlumniPage() {
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, graduationClass: gradClass || null, tags: tags || null, certificateNo: formCertNo.trim() || null }),
+        body: JSON.stringify({
+          name,
+          graduationClass: gradClass || null,
+          className: className || null,
+          email: email || null,
+          contact: contact || null,
+          tags: tags || null,
+          certificateNo: formCertNo.trim() || null,
+        }),
       });
       if (!res.ok) {
         const data = await res.json();
@@ -374,6 +417,9 @@ export default function AdminAlumniPage() {
               <tr className="border-b border-[#7C3AED]/10 text-left text-xs text-[#4C1D95]/50">
                 <th className="px-4 py-3 font-medium">姓名</th>
                 <th className="px-4 py-3 font-medium">届别</th>
+                <th className="px-4 py-3 font-medium">班级</th>
+                <th className="px-4 py-3 font-medium">邮箱</th>
+                <th className="px-4 py-3 font-medium">联系方式</th>
                 <th className="px-4 py-3 font-medium">标签</th>
                 <th className="px-4 py-3 font-medium">添加时间</th>
                 <th className="w-24 px-4 py-3 font-medium">操作</th>
@@ -387,6 +433,9 @@ export default function AdminAlumniPage() {
                 >
                   <td className="px-4 py-3 font-medium text-[#4C1D95]">{item.name}</td>
                   <td className="px-4 py-3 text-[#4C1D95]/60">{item.graduationClass || '-'}</td>
+                  <td className="px-4 py-3 text-[#4C1D95]/60">{item.className || '-'}</td>
+                  <td className="px-4 py-3 text-[#4C1D95]/60">{item.email || '-'}</td>
+                  <td className="px-4 py-3 text-[#4C1D95]/60">{item.contact || '-'}</td>
                   <td className="max-w-xs truncate px-4 py-3 text-[#4C1D95]/60">
                     {item.tags || '-'}
                   </td>
@@ -448,7 +497,7 @@ export default function AdminAlumniPage() {
             className="absolute inset-0 bg-[#4C1D95]/20 backdrop-blur-sm"
             onClick={() => !formSaving && setShowForm(false)}
           />
-          <div className="relative w-full max-w-md rounded-2xl border border-[#7C3AED]/10 bg-white p-6 shadow-xl">
+          <div className="relative max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl border border-[#7C3AED]/10 bg-white p-6 shadow-xl">
             <button
               onClick={() => !formSaving && setShowForm(false)}
               aria-label="关闭表单"
@@ -480,7 +529,40 @@ export default function AdminAlumniPage() {
                   value={formClass}
                   onChange={(e) => setFormClass(e.target.value)}
                   className="input w-full"
-                  placeholder="例如：2020届"
+                  placeholder="例如：2020"
+                  disabled={formSaving}
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-[#4C1D95]">班级</label>
+                <input
+                  type="text"
+                  value={formClassName}
+                  onChange={(e) => setFormClassName(e.target.value)}
+                  className="input w-full"
+                  placeholder="例如：1"
+                  disabled={formSaving}
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-[#4C1D95]">邮箱</label>
+                <input
+                  type="email"
+                  value={formEmail}
+                  onChange={(e) => setFormEmail(e.target.value)}
+                  className="input w-full"
+                  placeholder="用于区分同名同届校友"
+                  disabled={formSaving}
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-[#4C1D95]">联系方式</label>
+                <input
+                  type="text"
+                  value={formContact}
+                  onChange={(e) => setFormContact(e.target.value)}
+                  className="input w-full"
+                  placeholder="手机号或微信"
                   disabled={formSaving}
                 />
               </div>

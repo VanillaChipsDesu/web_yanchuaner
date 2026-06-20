@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { UserCheck, UserX, Users } from 'lucide-react';
+import { ShieldCheck, UserCheck, UserX, Users } from 'lucide-react';
+import { useAuth } from '@/components/AuthProvider';
 
 type UserRecord = {
   id: string;
@@ -20,6 +21,7 @@ type UserRecord = {
 };
 
 export default function AdminUsersPage() {
+  const { user: currentUser } = useAuth();
   const [users, setUsers] = useState<UserRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -52,7 +54,10 @@ export default function AdminUsersPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action }),
       });
-      if (!res.ok) throw new Error('Update failed');
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Update failed');
+      }
       fetchUsers();
     } catch (err: any) {
       alert('操作失败: ' + err.message);
@@ -135,7 +140,10 @@ export default function AdminUsersPage() {
                 <tr key={user.id} className="text-[#4C1D95]/70 transition hover:bg-[#7C3AED]/5">
                   <td className="px-4 py-3">
                     <p className="font-medium text-[#4C1D95]">{user.name || '-'}</p>
-                    <p className="text-xs">{user.username || '旧资料'} · {user.email || '-'}</p>
+                  </td>
+                  <td className="px-4 py-3">
+                    <p>{user.username || '旧资料'}</p>
+                    <p className="text-xs">{user.email || '-'}</p>
                   </td>
                   <td className="px-4 py-3">{[user.graduationClass, user.className].filter(Boolean).join(' / ') || '-'}</td>
                   <td className="px-4 py-3">{user.emailVerified ? '已验证' : '未验证'}</td>
@@ -161,7 +169,7 @@ export default function AdminUsersPage() {
                           </button>
                         </>
                       )}
-                      {user.status === 'VERIFIED' && (
+                      {user.status === 'VERIFIED' && user.id !== currentUser?.id && (
                         <button
                           onClick={() => runAction(user.id, 'reject-alumni')}
                           className="inline-flex items-center gap-1 rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1 text-xs text-rose-700 transition hover:bg-rose-100 cursor-pointer"
@@ -185,6 +193,15 @@ export default function AdminUsersPage() {
                       >
                         {user.accountStatus === 'ACTIVE' ? '停用' : '启用'}
                       </button>
+                      {user.role !== 'ADMIN' && (
+                        <button
+                          onClick={() => runAction(user.id, 'grant-admin')}
+                          className="inline-flex items-center gap-1 rounded-lg border border-violet-200 bg-violet-50 px-2.5 py-1 text-xs text-violet-700 transition hover:bg-violet-100 cursor-pointer"
+                        >
+                          <ShieldCheck size={14} />
+                          提升为管理员
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

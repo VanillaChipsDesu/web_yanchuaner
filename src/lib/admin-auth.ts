@@ -124,6 +124,6 @@ export async function requirePageAlumni() {
 
 export async function requirePageAdmin() {
   const user = await pageUser();
-  if (!user || user.role !== "ADMIN") redirect("/admin/login");
+  if (!user || user.role !== "ADMIN") redirect("/login?redirect=/admin");
   return user;
 }

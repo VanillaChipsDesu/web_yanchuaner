@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { requireAdmin } from "@/lib/admin-auth";
 import { normalizeTags } from "@/lib/tags";
+import { upsertRosterEntry } from "@/lib/roster";
 
 function parseCSVLine(text: string): string[] {
   const fields: string[] = [];
@@ -40,29 +41,43 @@ function parseCSVLine(text: string): string[] {
 
 function detectHeaders(
   fields: string[],
-): { nameIdx: number; classIdx: number; tagsIdx: number } {
+): {
+  nameIdx: number;
+  graduationClassIdx: number;
+  classNameIdx: number;
+  emailIdx: number;
+  tagsIdx: number;
+} {
   const headerMap: Record<string, string> = {
     姓名: "name",
     name: "name",
     届别: "graduationClass",
     graduationclass: "graduationClass",
+    班级: "className",
+    classname: "className",
+    邮箱: "email",
+    email: "email",
     标签: "tags",
     tags: "tags",
   };
 
   let nameIdx = -1;
-  let classIdx = -1;
+  let graduationClassIdx = -1;
+  let classNameIdx = -1;
+  let emailIdx = -1;
   let tagsIdx = -1;
 
   fields.forEach((f, i) => {
     const key = f.toLowerCase().replace(/[\s_-]/g, "");
     const mapped = headerMap[key];
     if (mapped === "name") nameIdx = i;
-    else if (mapped === "graduationClass") classIdx = i;
+    else if (mapped === "graduationClass") graduationClassIdx = i;
+    else if (mapped === "className") classNameIdx = i;
+    else if (mapped === "email") emailIdx = i;
     else if (mapped === "tags") tagsIdx = i;
   });
 
-  return { nameIdx, classIdx, tagsIdx };
+  return { nameIdx, graduationClassIdx, classNameIdx, emailIdx, tagsIdx };
 }
 
 export async function POST(req: NextRequest) {
@@ -89,7 +104,13 @@ export async function POST(req: NextRequest) {
     }
 
     const headers = parseCSVLine(lines[0]);
-    const { nameIdx, classIdx, tagsIdx } = detectHeaders(headers);
+    const {
+      nameIdx,
+      graduationClassIdx,
+      classNameIdx,
+      emailIdx,
+      tagsIdx,
+    } = detectHeaders(headers);
 
     if (nameIdx === -1) {
       return NextResponse.json(
@@ -115,7 +136,15 @@ export async function POST(req: NextRequest) {
           continue;
         }
         const graduationClass =
-          classIdx >= 0 ? (fields[classIdx] || "").trim() || null : null;
+          graduationClassIdx >= 0
+            ? (fields[graduationClassIdx] || "").trim() || null
+            : null;
+        const className =
+          classNameIdx >= 0 ? (fields[classNameIdx] || "").trim() || null : null;
+        const email =
+          emailIdx >= 0
+            ? (fields[emailIdx] || "").trim().toLowerCase() || null
+            : null;
         const rawTags =
           tagsIdx >= 0 ? (fields[tagsIdx] || "").trim() || null : null;
         const tags = rawTags ? normalizeTags(rawTags) : null;
@@ -125,23 +154,27 @@ export async function POST(req: NextRequest) {
           skipped++;
           continue;
         }
-
-        // 按 name + graduationClass 简单去重
-        const existing = await prisma.whitelistRoster.findFirst({
-          where: {
-            name,
-            graduationClass: graduationClass || undefined,
-          },
-        });
-
-        if (existing) {
+        if (
+          (graduationClass && graduationClass.length > 50) ||
+          (className && className.length > 64) ||
+          (email && (email.length > 254 || !email.includes("@")))
+        ) {
+          errors.push(`第 ${i + 1} 行：届别、班级或邮箱格式无效`);
           skipped++;
           continue;
         }
 
-        await prisma.whitelistRoster.create({
-          data: { name, graduationClass, tags },
+        const { created } = await upsertRosterEntry(prisma, {
+          name,
+          graduationClass,
+          className,
+          email,
+          tags,
         });
+        if (!created) {
+          skipped++;
+          continue;
+        }
         imported++;
       } catch {
         errors.push(`第 ${i + 1} 行：解析失败`);

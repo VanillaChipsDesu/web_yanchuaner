@@ -6,6 +6,7 @@ import {
   sendPasswordResetEmail,
   sendVerificationEmail,
 } from "@/lib/email";
+import { upsertRosterEntry } from "@/lib/roster";
 
 type ActionName =
   | "approve-alumni"
@@ -74,6 +75,12 @@ export async function POST(
         { status: 400 },
       );
     }
+    if (target.id === admin.id && action === "reject-alumni") {
+      return NextResponse.json(
+        { error: "不能撤销当前管理员的校友认证" },
+        { status: 400 },
+      );
+    }
 
     if (action === "resend-verification") {
       if (!target.email || target.emailVerified) {
@@ -115,21 +122,13 @@ export async function POST(
         target.name?.trim() &&
         target.graduationClass?.trim()
       ) {
-        const rosterEntry = await tx.whitelistRoster.findFirst({
-          where: {
-            name: target.name.trim(),
-            graduationClass: target.graduationClass.trim(),
-          },
-          select: { id: true },
+        await upsertRosterEntry(tx, {
+          name: target.name,
+          graduationClass: target.graduationClass,
+          className: target.className,
+          email: target.email,
+          contact: target.contact,
         });
-        if (!rosterEntry) {
-          await tx.whitelistRoster.create({
-            data: {
-              name: target.name.trim(),
-              graduationClass: target.graduationClass.trim(),
-            },
-          });
-        }
       }
       const data =
         action === "approve-alumni"

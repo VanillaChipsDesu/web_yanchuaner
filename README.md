@@ -173,7 +173,7 @@ npm run dev
 ### 默认入口
 
 - 首页：[http://localhost:3000](http://localhost:3000)
-- 管理员登录：[http://localhost:3000/admin/login](http://localhost:3000/admin/login)
+- 管理员登录：[http://localhost:3000/login?redirect=/admin](http://localhost:3000/login?redirect=/admin)
 - 燕中记忆文化长廊：[http://localhost:3000/alumni/memories](http://localhost:3000/alumni/memories)
 - 电子校友纪念卡：[http://localhost:3000/alumni/certificate](http://localhost:3000/alumni/certificate)
 - 校友地图：[http://localhost:3000/alumni/university-map](http://localhost:3000/alumni/university-map)
@@ -243,7 +243,7 @@ node scripts/set-credentials.js
 | `/teachers` | 公开 | 教师频道（数据库驱动） |
 | `/contact` | 公开 | 联系我们（数据库驱动） |
 | `/about` | 公开 | 学校介绍（数据库驱动） |
-| `/admin/login` | 公开 | 管理员登录 |
+| `/login` | 公开 | 普通用户与管理员共用登录页 |
 | `/admin` | 管理员 | 后台控制面板 |
 | `/admin/news` | 管理员 | 新闻管理 |
 | `/admin/events` | 管理员 | 活动管理（含报名名单） |

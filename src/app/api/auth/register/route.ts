@@ -82,7 +82,12 @@ export async function POST(req: NextRequest) {
     const verification = createOneTimeToken();
     const rosterMatch = graduationClass
       ? await prisma.whitelistRoster.findFirst({
-          where: { name, graduationClass },
+          where: {
+            name,
+            graduationClass,
+            className: className || null,
+            email,
+          },
           select: { id: true },
         })
       : null;

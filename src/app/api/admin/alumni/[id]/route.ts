@@ -45,6 +45,9 @@ export async function PUT(
     const body = await req.json();
     const name = (body.name || "").trim();
     const graduationClass = (body.graduationClass || "").trim() || null;
+    const className = (body.className || "").trim() || null;
+    const email = (body.email || "").trim().toLowerCase() || null;
+    const contact = (body.contact || "").trim() || null;
     const tags = normalizeTags((body.tags || "").trim()) || null;
     const certificateNo = (body.certificateNo || "").trim() || null;
 
@@ -60,6 +63,18 @@ export async function PUT(
         { status: 400 },
       );
     }
+    if (className && className.length > 64) {
+      return NextResponse.json(
+        { error: "班级长度不能超过 64 字" },
+        { status: 400 },
+      );
+    }
+    if (email && (email.length > 254 || !email.includes("@"))) {
+      return NextResponse.json({ error: "邮箱格式无效" }, { status: 400 });
+    }
+    if (contact && !/^\d{11}$/.test(contact)) {
+      return NextResponse.json({ error: "联系方式需为11位手机号" }, { status: 400 });
+    }
     if (tags && tags.length > 500) {
       return NextResponse.json(
         { error: "标签长度不超过500字" },
@@ -69,7 +84,15 @@ export async function PUT(
 
     const alumni = await prisma.whitelistRoster.update({
       where: { id: params.id },
-      data: { name, graduationClass, tags, certificateNo },
+      data: {
+        name,
+        graduationClass,
+        className,
+        email,
+        contact,
+        tags,
+        certificateNo,
+      },
     });
 
     return NextResponse.json({ alumni });

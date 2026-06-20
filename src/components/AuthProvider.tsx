@@ -8,7 +8,7 @@ import {
   useMemo,
   useState,
 } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 export type AuthUser = {
   id: string;
@@ -38,6 +38,7 @@ export default function AuthProvider({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -61,6 +62,12 @@ export default function AuthProvider({
   useEffect(() => {
     void refresh();
   }, [refresh]);
+
+  useEffect(() => {
+    if (pathname === "/login") {
+      void refresh();
+    }
+  }, [pathname, refresh]);
 
   const logout = useCallback(async () => {
     await fetch("/api/auth/logout", { method: "POST" });

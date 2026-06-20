@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { requireAdmin } from "@/lib/admin-auth";
 import { normalizeTags } from "@/lib/tags";
+import { upsertRosterEntry } from "@/lib/roster";
 
 export async function GET(req: NextRequest) {
   const auth = await requireAdmin(req);
@@ -28,6 +29,8 @@ export async function GET(req: NextRequest) {
           { name: { contains: q } },
           { tags: { contains: q } },
           { graduationClass: { contains: q } },
+          { className: { contains: q } },
+          { email: { contains: q } },
         ],
       });
     }
@@ -66,6 +69,9 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const name = (body.name || "").trim();
     const graduationClass = (body.graduationClass || "").trim() || null;
+    const className = (body.className || "").trim() || null;
+    const email = (body.email || "").trim().toLowerCase() || null;
+    const contact = (body.contact || "").trim() || null;
     const tags = normalizeTags((body.tags || "").trim()) || null;
     const certificateNo = (body.certificateNo || "").trim() || null;
 
@@ -81,6 +87,18 @@ export async function POST(req: NextRequest) {
         { status: 400 },
       );
     }
+    if (className && className.length > 64) {
+      return NextResponse.json(
+        { error: "班级长度不能超过 64 字" },
+        { status: 400 },
+      );
+    }
+    if (email && (email.length > 254 || !email.includes("@"))) {
+      return NextResponse.json({ error: "邮箱格式无效" }, { status: 400 });
+    }
+    if (contact && !/^\d{11}$/.test(contact)) {
+      return NextResponse.json({ error: "联系方式需为11位手机号" }, { status: 400 });
+    }
     if (tags && tags.length > 500) {
       return NextResponse.json(
         { error: "标签长度不超过500字" },
@@ -88,11 +106,20 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const alumni = await prisma.whitelistRoster.create({
-      data: { name, graduationClass, tags, certificateNo },
+    const { entry: alumni, created } = await upsertRosterEntry(prisma, {
+      name,
+      graduationClass,
+      className,
+      email,
+      contact,
+      tags,
+      certificateNo,
     });
 
-    return NextResponse.json({ alumni }, { status: 201 });
+    return NextResponse.json(
+      { alumni, created },
+      { status: created ? 201 : 200 },
+    );
   } catch (error) {
     console.error("Admin alumni POST error:", error);
     return NextResponse.json(

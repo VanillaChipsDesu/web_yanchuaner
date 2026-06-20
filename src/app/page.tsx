@@ -173,7 +173,7 @@ export default async function HomePage() {
             在这里，我们跨越山海，重温青春记忆。寻找同窗挚友，探索校友足迹，共建属于我们的精神家园。
           </p>
           <div className="mt-4 flex flex-wrap items-center justify-center gap-4">
-            <JoinTriggerButton />
+            {!currentUser ? <JoinTriggerButton /> : null}
             <Link
               href="/alumni/radar"
               className="btn-secondary rounded-full border border-[#A78BFA]/40 bg-white px-8 py-3.5 font-bold text-[#7C3AED] shadow-sm transition-all hover:-translate-y-1 hover:bg-[#F3E8FF] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#7C3AED] focus:ring-offset-2 focus:ring-offset-[#FAF5FF]"

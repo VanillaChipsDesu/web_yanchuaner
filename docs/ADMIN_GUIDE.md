@@ -6,7 +6,7 @@
 
 ## 1. 登录后台
 
-1. 打开浏览器访问 `https://yanchuaner.cn/admin/login`
+1. 打开浏览器访问 `https://yanchuaner.cn/login?redirect=/admin`
 2. 输入数据库中已创建的管理员用户名和密码
 3. 登录成功后自动跳转到 `/admin` 控制面板，可看到各模块统计概览
 4. 会话通过 httpOnly cookie (`yc_access_token`，role=admin) 维持，关闭浏览器后需重新登录

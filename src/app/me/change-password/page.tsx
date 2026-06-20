@@ -1,12 +1,27 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/components/AuthProvider";
 
 export default function ChangePasswordPage() {
   const router = useRouter();
+  const { refresh } = useAuth();
   const [message, setMessage] = useState("");
+  const [countdown, setCountdown] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (countdown === null) return;
+    if (countdown <= 0) {
+      router.push("/login");
+      router.refresh();
+      return;
+    }
+    const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [countdown, router]);
+
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const body = Object.fromEntries(new FormData(event.currentTarget).entries());
@@ -17,8 +32,9 @@ export default function ChangePasswordPage() {
     });
     const data = await response.json();
     if (response.ok) {
-      setMessage("密码已修改，请重新登录。");
-      setTimeout(() => router.push("/login"), 2500);
+      setMessage("");
+      await refresh();
+      setCountdown(3);
     } else {
       setMessage(data.error || "修改失败");
     }
@@ -36,6 +52,16 @@ export default function ChangePasswordPage() {
         <button className="btn-primary w-full">修改密码</button>
         {message ? <p className="text-sm">{message}</p> : null}
       </form>
+      {countdown !== null ? (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-brand-fg/20 px-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-2xl border border-brand/15 bg-white p-7 text-center shadow-xl">
+            <p className="text-lg font-semibold text-brand-fg">
+              密码修改成功，即将返回登录页面…
+            </p>
+            <p className="mt-3 text-3xl font-bold text-brand">{countdown}</p>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }

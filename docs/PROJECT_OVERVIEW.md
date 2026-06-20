@@ -155,7 +155,7 @@ model Story                     # 燕中故事（title, author, tags, body, date
 | 校友数据 API | `/api/alumni/*` | `requireVerifiedAlumni()` — 已认证校友或管理员可访问 |
 | 图片上传 | `/api/upload`、`/api/alumni/certificate/upload-bg`、`/api/settings/card-bg/upload` | 仅管理员 |
 | 公开 API | `/api/news`、`/api/events`、`/api/health`、`/api/join` | 无需鉴权 |
-| API 限流 | `/api/join`、`/api/alumni/correction-requests`、`/admin/login` | 内存/Redis 限流 |
+| API 限流 | `/api/join`、`/api/alumni/correction-requests`、`/api/auth/login` | 内存/Redis 限流 |
 
 > 环境变量只写变量名和用途说明，不写真实值。参考 `docs/OPERATIONS_GUIDE.md`。
 

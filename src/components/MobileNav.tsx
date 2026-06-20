@@ -80,6 +80,7 @@ const JOIN_CTA =
 export default function MobileNav() {
   const { user, isLoggedIn, logout } = useAuth();
   const pathname = usePathname() || '/';
+  const isAdminPath = pathname === '/admin' || pathname.startsWith('/admin/');
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [openGroup, setOpenGroup] = useState<string | null>(null);
@@ -250,9 +251,11 @@ export default function MobileNav() {
             <Link href="/me" className={cn(JOIN_CTA, 'ml-2')}>
               {user?.username || user?.name || '个人中心'}
             </Link>
-            <button type="button" onClick={() => void logout()} className="ml-2 text-sm text-brand">
-              退出
-            </button>
+            {!isAdminPath ? (
+              <button type="button" onClick={() => void logout()} className="ml-2 text-sm text-brand">
+                退出
+              </button>
+            ) : null}
           </>
         ) : (
           <>
@@ -360,9 +363,11 @@ export default function MobileNav() {
                   <Link href="/me" onClick={() => setOpen(false)} className={cn(JOIN_CTA, 'w-full')}>
                     个人中心
                   </Link>
-                  <button type="button" onClick={() => void logout()} className="w-full text-sm text-brand">
-                    退出登录
-                  </button>
+                  {!isAdminPath ? (
+                    <button type="button" onClick={() => void logout()} className="w-full text-sm text-brand">
+                      退出登录
+                    </button>
+                  ) : null}
                 </div>
               ) : (
                 <div className="space-y-2">

@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import prisma from "@/lib/db";
 import { getAuthenticatedUser } from "@/lib/admin-auth";
-import { readJsonBody } from "@/lib/auth-utils";
+import {
+  normalizeUsername,
+  readJsonBody,
+  USERNAME_PATTERN,
+} from "@/lib/auth-utils";
 
 const select = {
   id: true,
@@ -30,52 +35,33 @@ export async function PATCH(req: NextRequest) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
     const body = await readJsonBody<{
-      name?: unknown;
+      username?: unknown;
       contact?: unknown;
-      graduationClass?: unknown;
-      className?: unknown;
     }>(req);
-    const name = typeof body.name === "string" ? body.name.trim() : "";
+    const username = normalizeUsername(body.username);
     const contact = typeof body.contact === "string" ? body.contact.trim() : "";
-    const graduationClass =
-      typeof body.graduationClass === "string"
-        ? body.graduationClass.trim()
-        : "";
-    const className =
-      typeof body.className === "string" ? body.className.trim() : "";
     if (
-      !name ||
-      name.length > 64 ||
-      contact.length > 128 ||
-      graduationClass.length > 32 ||
-      className.length > 64
+      !USERNAME_PATTERN.test(username) ||
+      contact.length > 128
     ) {
       return NextResponse.json({ error: "资料格式无效" }, { status: 400 });
     }
-    const identityChanged =
-      name !== user.name || graduationClass !== (user.graduationClass || "");
-    const updated = await prisma.$transaction(async (tx) => {
-      const result = await tx.user.update({
-        where: { id: user.id },
-        data: {
-          name,
-          contact: contact || null,
-          graduationClass: graduationClass || null,
-          className: className || null,
-          ...(identityChanged && user.role !== "ADMIN"
-            ? {
-                role: "GUEST",
-                status: "PENDING",
-                sessionVersion: { increment: 1 },
-              }
-            : {}),
-        },
-        select,
-      });
-      return result;
+    const updated = await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        username,
+        contact: contact || null,
+      },
+      select,
     });
-    return NextResponse.json({ user: updated, reauthenticationRequired: identityChanged });
-  } catch {
+    return NextResponse.json({ user: updated });
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      return NextResponse.json({ error: "用户名已被使用" }, { status: 409 });
+    }
     return NextResponse.json({ error: "更新失败" }, { status: 500 });
   }
 }
