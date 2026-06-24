@@ -35,8 +35,8 @@
 
 | 功能 | 说明 |
 |------|------|
-| 用户注册登录 | 用户名、邮箱和密码注册，登录后通过 httpOnly cookie 维持会话 |
-| 管理员登录 | 数据库管理员账号 + HMAC-SHA256 token 登录后台 |
+| 用户注册登录 | 用户名、邮箱和密码注册，邮箱验证后登录，httpOnly cookie 维持会话 |
+| 管理员登录 | 数据库管理员账号（bcrypt）+ HMAC-SHA256 token 登录后台 |
 | 新闻管理 | 后台编辑、发布/下架、删除新闻；前台公开可访问 |
 | 活动管理 | 后台编辑、发布/下架、删除活动；支持在线报名 |
 | 活动报名名单导出 | 管理员导出 CSV（UTF-8 BOM，防 Excel 公式注入） |
@@ -65,7 +65,9 @@
 | 样式 | Tailwind CSS | 3.4 |
 | 地图 | Leaflet + react-leaflet | 1.9.4 |
 | 图像处理 | Sharp | 0.34 |
-| 认证 | HMAC-SHA256 + httpOnly cookie | — |
+| 认证 | bcrypt + HMAC-SHA256 httpOnly cookie（RBAC：GUEST/ALUMNI/ADMIN） | — |
+| 邮件 | Resend API（邮箱验证、密码重置） | — |
+| 限流 | Redis / 内存降级 | — |
 | 部署 | systemd + Nginx + `output: "standalone"` | — |
 
 ## 前端架构与组件化设计
@@ -112,10 +114,12 @@
 ### 数据库模型（Prisma Schema）
 
 ```
-model User                      # 用户（name, contact, role, status）
-model WhitelistRoster           # 校友名单（name, graduationClass, tags, certificateNo）
+model User                      # 用户（username, passwordHash, email, name, graduationClass, className, role, status, accountStatus, sessionVersion, emailVerified, mergedIntoUserId）
+model WhitelistRoster           # 校友名单（name, graduationClass, className, email, contact, tags, certificateNo）
 model AlumniCorrectionRequest   # 校友信息修改申请（当前值/申请值对比, status, adminNote）
 model Post                      # 投稿（title, content, type, status, authorId）
+model AuditLog                  # 管理员操作审计日志（action, targetType, targetId, adminId, before, after）
+model UserClaimRequest          # 旧资料认领申请（claimantUserId, oldUserId, description, status, reviewedById）
 model News                      # 新闻（title, summary, content, imageUrl, status）
 model Event                     # 活动（title, summary, location, eventDate, maxAttendees, status）
 model EventRegistration         # 活动报名（eventId, name, contact, message）
@@ -130,10 +134,7 @@ model Story                     # 燕中故事（title, author, tags, body, date
 |------|------|
 | `src/data/cityCoordinates.ts` | 城市名称 → 经纬度坐标映射 |
 | `src/data/studentResources.ts` | 在校生资源站内容（志愿参考、专业观察等） |
-| `src/data/stories.json` | 燕中故事数据 |
-| `src/data/memoriesGallery.json` | 燕中记忆种子数据（仅用于 `scripts/seed_memories.js` 初始化） |
 | `src/data/starMessages.ts` | 首页校友寄语数据 |
-| `src/data/alumni_encrypted.ts` | 加密的校友数据 |
 
 ## 数据持久化路径
 
@@ -150,12 +151,14 @@ model Story                     # 燕中故事（title, author, tags, body, date
 
 | 层级 | 保护范围 | 验证方式 |
 |------|----------|----------|
-| 用户会话 | 个人中心与受保护页面 | 数据库账号密码 → httpOnly cookie (`yc_access_token`) |
-| 管理员后台 | `/admin/*`、`/api/admin/*` | 数据库管理员账号密码 → httpOnly cookie (`yc_access_token`, role=admin) |
+| 用户会话 | 个人中心与受保护页面 | 数据库账号密码（bcrypt）→ httpOnly cookie (`yc_access_token`) |
+| 管理员后台 | `/admin/*`、`/api/admin/*` | 数据库管理员账号密码 → httpOnly cookie (`yc_access_token`, role=admin), sessionVersion 防会话重用 |
 | 校友数据 API | `/api/alumni/*` | `requireVerifiedAlumni()` — 已认证校友或管理员可访问 |
 | 图片上传 | `/api/upload`、`/api/alumni/certificate/upload-bg`、`/api/settings/card-bg/upload` | 仅管理员 |
 | 公开 API | `/api/news`、`/api/events`、`/api/health`、`/api/join` | 无需鉴权 |
-| API 限流 | `/api/join`、`/api/alumni/correction-requests`、`/api/auth/login` | 内存/Redis 限流 |
+| API 限流 | 注册、登录、邮箱验证、密码重置、投稿等 | Redis / 内存降级限流 |
+| 审计日志 | 管理员敏感操作（认证通过/撤销、账号停用/恢复、权限变更） | AuditLog 表，与业务变更在同一事务中写入 |
+| session 失效 | 修改密码、停用账号、强制退出 | `sessionVersion` 递增，所有旧 token 即时失效 |
 
 > 环境变量只写变量名和用途说明，不写真实值。参考 `docs/OPERATIONS_GUIDE.md`。
 
@@ -199,7 +202,7 @@ aerospace-alumni-site/
 │   │   ├── AlumniSearch.tsx          # 校友搜索
 │   │   ├── AlumniMap.tsx             # 校友地图（Leaflet）
 │   │   ├── CityMapRenderer.tsx       # 城市地图渲染
-│   │   ├── Gatekeeper.tsx            # 口令门卫
+│   │   ├── AuthProvider.tsx          # 用户认证上下文
 │   │   ├── JoinRequestModal.tsx      # 加入申请弹窗
 │   │   ├── EventRegistrationForm.tsx # 活动报名表单
 │   │   ├── LatestUpdatesSection.tsx  # 最新动态
@@ -213,10 +216,10 @@ aerospace-alumni-site/
 │   ├── data/                         # 静态数据
 │   │   ├── cityCoordinates.ts        # 城市经纬度坐标
 │   │   ├── studentResources.ts       # 在校生资源内容
-│   │   ├── stories.json              # 燕中故事
-│   │   ├── memoriesGallery.json      # 校园记忆图片
 │   │   ├── starMessages.ts           # 校友寄语
-│   │   └── alumni_encrypted.ts       # 加密校友数据
+│   │   ├── stories.json              # 燕中故事（旧版静态文件，已由数据库驱动取代）
+│   │   ├── memoriesGallery.json      # 校园记忆（旧版静态文件，已由数据库驱动取代）
+│   │   └── alumni_encrypted.ts       # 加密校友数据（旧版，已由 WhitelistRoster 取代）
 │   ├── lib/                          # 工具库
 │   │   ├── db.ts                     # 数据库客户端
 │   │   ├── verify-token.ts           # 用户与管理员会话 Token 验证
@@ -224,6 +227,10 @@ aerospace-alumni-site/
 │   │   ├── cache.ts                  # 缓存工具
 │   │   ├── redis.ts                  # Redis 客户端
 │   │   ├── rate-limit.ts             # API 限流
+│   │   ├── auth-utils.ts             # 认证工具函数（密码哈希/验证）
+│   │   ├── email.ts                  # 邮件发送（Resend API）
+│   │   ├── roster.ts                 # 校友名单去重写入
+│   │   ├── achievements.ts           # 校友成就工具函数
 │   │   ├── image-pipeline.ts         # 图片处理管道（Sharp）
 │   │   ├── tags.ts                   # Tags 解析与标准化
 │   │   └── memories.ts               # 记忆板块工具（icon→板块名 + 文件重命名）
@@ -234,6 +241,7 @@ aerospace-alumni-site/
 ├── scripts/                          # 运维脚本
 │   ├── smoke-test.js                 # 关键路径回归测试
 │   ├── create_admin.ts               # 创建数据库管理员账号
+│   ├── migrate_users.ts                # 旧用户数据迁移审查（生成 CSV）
 │   ├── seed_content_sections.js      # 种子页面内容数据
 │   ├── seed_whitelist.js             # 种子校友名单
 │   ├── seed_memories.js              # 种子燕中记忆数据
@@ -245,7 +253,7 @@ aerospace-alumni-site/
 │   ├── sync_roster.js                # 同步名单
 │   ├── build_list.js                 # 构建列表
 │   └── clean.sh                      # 清理脚本
-├── docs/                             # 项目文档（9 个文件）
+├── docs/                             # 项目文档
 ├── public/                           # 静态资源（图片、上传文件）
 ├── next.config.mjs                   # Next.js 配置
 ├── tailwind.config.ts                # Tailwind 配置

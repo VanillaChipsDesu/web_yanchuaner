@@ -151,7 +151,7 @@ const Component = dynamic(() => import('./Component'), { ssr: false });
 ### 10. API 返回 401 Unauthorized
 
 **排查**：
-1. 确认已通过口令验证页面输入正确口令
+1. 确认当前已登录（浏览器开发者工具 → Application → Cookies → 确认 `yc_access_token` 存在）
 2. 检查 cookie 是否过期（重新登录看是否恢复）
 3. 如果是管理员 API（`/api/admin/*`），确认当前登录的是管理员账号而非普通用户账号
 4. 查看服务端日志确认具体拒绝原因

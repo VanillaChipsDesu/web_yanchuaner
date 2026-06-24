@@ -11,7 +11,8 @@
     "update-list": "node scripts/build_list.js",
     "create-admin": "tsx scripts/create_admin.ts",
     "migrate-users": "tsx scripts/migrate_users.ts",
-    "smoke": "node scripts/smoke-test.js"
+    "smoke": "node scripts/smoke-test.js",
+    "seed-all": "node scripts/seed_content_sections.js && node scripts/seed_memories.js && node scripts/seed_stories.js"
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.8.0",

@@ -59,7 +59,7 @@
 
 - **前端**：Next.js 14.2 (App Router) + TypeScript 5 + Tailwind CSS 3.4
 - **数据**：Prisma 7.x + SQLite (better-sqlite3)
-- **认证**：HMAC-SHA256 + httpOnly cookie（双层：访问口令 + 管理员）
+- **认证**：个人账号体系（bcrypt 密码哈希 + 邮箱验证 + HMAC-SHA256 httpOnly cookie），RBAC 角色（GUEST/ALUMNI/ADMIN）
 - **部署**：systemd + Nginx + Let's Encrypt（`output: "standalone"`）
 - **图像**：Sharp 服务端处理
 - **地图**：Leaflet 1.9.4 + react-leaflet
@@ -89,8 +89,8 @@
 
 | 凭据 | 保护范围 | 实现 |
 | --- | --- | --- |
-| 用户账号 | 个人中心及校友功能 | 数据库账号密码 → httpOnly cookie |
-| 管理员账号 | `/admin/*`、`/api/admin/*`、上传 API | 数据库管理员账号密码 → httpOnly cookie (role=admin) |
+| 用户账号 | 个人中心及校友功能 | 数据库账号密码（bcrypt）+ 邮箱验证 → httpOnly cookie |
+| 管理员账号 | `/admin/*`、`/api/admin/*`、上传 API | 数据库管理员账号密码 → httpOnly cookie (role=admin)，sessionVersion 防会话重用 |
 
 详见 [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md#安全边界) 中的「安全边界」章节。
 
@@ -102,9 +102,11 @@
 | --- | --- |
 | 新增页面 | [ROUTES.md](ROUTES.md) |
 | 新增 API | [ROUTES.md](ROUTES.md) |
+| 废弃 API / 页面 | [ROUTES.md](ROUTES.md) + 清理无关文件 |
 | 新增 UI 组件 / 修改设计令牌 | [UI_GUIDE.md](UI_GUIDE.md) |
 | 新增环境变量 | [OPERATIONS_GUIDE.md](OPERATIONS_GUIDE.md) + `.env.example` |
 | 新增脚本 | [OPERATIONS_GUIDE.md](OPERATIONS_GUIDE.md#脚本工具) |
+| 废弃脚本 | [OPERATIONS_GUIDE.md](OPERATIONS_GUIDE.md#脚本工具) + 删除脚本文件 |
 | 后台功能变更 | [ADMIN_GUIDE.md](ADMIN_GUIDE.md) |
 | 部署流程变更 | [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) |
 | 备份策略变更 | [BACKUP_GUIDE.md](BACKUP_GUIDE.md) |

@@ -33,9 +33,9 @@
 | 模块 | 能力 |
 | --- | --- |
 | 前台 | 首页、新闻、活动、燕中记忆文化长廊、校友城市分布地图、燕中故事、校友成就墙、在校生资源站、教师频道、学校介绍、联系我们 |
-| 后台 | 新闻管理、活动管理、校友名单（CRUD/导入/导出/证书编号）、燕中记忆管理、燕中故事管理、校友成就墙管理、页面内容管理（教师频道/学校介绍/联系我们/在校生）、修改申请审核、投稿管理、用户管理 |
-| 数据 | Prisma 7.x + SQLite，10 个数据模型，本地和生产均使用 SQLite 文件持久化 |
-| 认证 | 普通访问口令（httpOnly cookie）+ 管理员登录（HMAC-SHA256 token），各自独立鉴权 |
+| 后台 | 新闻管理、活动管理、校友名单（CRUD/导入/导出/证书编号）、燕中记忆管理、燕中故事管理、校友成就墙管理、页面内容管理（教师频道/学校介绍/联系我们/在校生）、修改申请审核、投稿管理、用户管理（认证审核/账号操作/审计日志） |
+| 数据 | Prisma 7.x + SQLite，多数据模型，本地和生产均使用 SQLite 文件持久化 |
+| 认证 | 个人账号体系（用户名/密码 + 邮箱验证 + bcrypt 哈希），httpOnly cookie 维持会话，角色分为 GUEST/ALUMNI/ADMIN，校友认证需名册匹配或管理员审核 |
 | 图片 | 管理员上传图片自动 16:9 裁切（Sharp），新闻/活动/记忆展品封面统一规格 |
 | 地图 | 校友大学城市分布（Leaflet 地图 + 城市聚合统计 + 校友明细） |
 | 安全 | API 限流（内存/Redis）、CSV 导出防公式注入、httpOnly cookie、凭据脚本一键轮换 |
@@ -91,6 +91,11 @@ aerospace-alumni-site/
 │   │   ├── page.tsx                  # 首页
 │   │   ├── layout.tsx                # 根布局
 │   │   ├── globals.css               # 全局样式
+│   │   ├── login/                    # 统一登录页（普通用户 + 管理员）
+│   │   ├── register/                 # 用户注册页
+│   │   ├── verify-email/             # 邮箱验证页
+│   │   ├── reset-password/           # 密码重置页
+│   │   ├── me/                       # 个人中心（资料/编辑/投稿/改密码）
 │   │   ├── about/                    # 学校介绍
 │   │   ├── news/                     # 新闻列表/详情
 │   │   ├── events/                   # 活动列表/详情/报名
@@ -98,7 +103,7 @@ aerospace-alumni-site/
 │   │   ├── teachers/                 # 教师频道
 │   │   ├── students/                 # 在校生资源站（5 个子页）
 │   │   ├── alumni/                   # 校友相关（证书、地图、记忆、故事、修改申请）
-│   │   ├── admin/                    # 后台管理（含燕中记忆、故事、教师频道、内容管理）
+│   │   ├── admin/                    # 后台管理（含用户管理/认证审核/审计日志）
 │   │   └── api/                      # API 路由（40+ 个端点）
 │   ├── components/                   # React 通用组件
 │   │   ├── ui/                        # UI 基础组件库（GlassCard/PageHeader/Button/Badge/EmptyState 等 + 设计令牌）
@@ -110,6 +115,9 @@ aerospace-alumni-site/
 │   │   ├── db.ts                     # Prisma 客户端
 │   │   ├── admin-auth.ts             # 管理员鉴权
 │   │   ├── verify-token.ts           # Token 验证
+│   │   ├── auth-utils.ts             # 认证工具函数
+│   │   ├── email.ts                  # Resend 邮件发送
+│   │   ├── roster.ts                 # 校友名单去重写入
 │   │   ├── cache.ts                  # 缓存（Redis/内存）
 │   │   ├── redis.ts                  # Redis 客户端
 │   │   ├── rate-limit.ts             # API 限流
@@ -118,13 +126,12 @@ aerospace-alumni-site/
 │   │   └── memories.ts               # 记忆板块文件重命名
 │   └── middleware.ts                 # 路由中间件（认证）
 ├── prisma/
-│   └── schema.prisma                 # 数据模型定义（12 个模型）
+│   └── schema.prisma                 # 数据模型定义
 ├── prisma.config.ts                  # Prisma 7.x 数据源配置
 ├── public/                           # 静态资源（图片、Leaflet 图标、上传文件）
-├── scripts/                          # 运维脚本（13 个）
-├── docs/                             # 项目文档（8 个文件）
+├── scripts/                          # 运维脚本
+├── docs/                             # 项目文档
 ├── .env.example                      # 环境变量模板
-├── credentials.example.json          # 凭据脚本模板
 ├── Dockerfile                        # Docker 多阶段构建
 ├── docker-compose.yml                # Docker Compose 编排
 ├── next.config.mjs                   # Next.js 配置
@@ -152,19 +159,23 @@ npm ci
 
 # 2. 配置环境变量
 cp .env.example .env
-# 编辑 .env，填入凭据（参考 docs/OPERATIONS_GUIDE.md）
+# 编辑 .env，至少填入 DATABASE_URL、SESSION_SECRET、APP_URL
+# （RESEND_API_KEY / REDIS_URL 可选，本地测试可留空）
 
 # 3. 初始化数据库
-DATABASE_URL="file:./dev.db" npx prisma generate
-DATABASE_URL="file:./dev.db" npx prisma db push
+npx prisma generate
+npx prisma db push
 
-# 4. （可选）种子数据初始化
-node scripts/seed_whitelist.js        # 校友名单（107 条）
-node scripts/seed_memories.js         # 燕中记忆展品（6 条）
+# 4. （可选）创建管理员账号
+npm run create-admin
+
+# 5. （可选）初始化示例数据
+node scripts/seed_whitelist.js        # 校友名单
+node scripts/seed_memories.js         # 燕中记忆展品
 node scripts/seed_content_sections.js # 页面内容（about/contact/students/teachers）
-node scripts/seed_stories.js          # 燕中故事（3 条）
+node scripts/seed_stories.js          # 燕中故事
 
-# 5. 启动开发服务器
+# 6. 启动开发服务器
 npm run dev
 ```
 
@@ -173,6 +184,9 @@ npm run dev
 ### 默认入口
 
 - 首页：[http://localhost:3000](http://localhost:3000)
+- 用户登录：[http://localhost:3000/login](http://localhost:3000/login)
+- 用户注册：[http://localhost:3000/register](http://localhost:3000/register)
+- 个人中心：[http://localhost:3000/me](http://localhost:3000/me)
 - 管理员登录：[http://localhost:3000/login?redirect=/admin](http://localhost:3000/login?redirect=/admin)
 - 燕中记忆文化长廊：[http://localhost:3000/alumni/memories](http://localhost:3000/alumni/memories)
 - 电子校友纪念卡：[http://localhost:3000/alumni/certificate](http://localhost:3000/alumni/certificate)
@@ -187,33 +201,26 @@ npm run dev
 | `npm run start` | 启动生产服务 |
 | `npm run lint` | ESLint 静态检查 |
 | `npx prisma generate` | 生成 Prisma Client |
-| `DATABASE_URL="file:./dev.db" npx prisma db push` | 同步数据库 schema |
+| `npx prisma db push` | 同步数据库 schema |
 | `npx prisma studio` | 打开 Prisma 数据库浏览器 |
-| `node scripts/smoke-test.js` | 关键路径回归测试 |
-| `node scripts/set-credentials.js` | 一键更新访问口令和管理员账号密码 |
+| `npm run create-admin` | 创建数据库管理员账号 |
+| `npm run smoke` | 关键路径冒烟测试 |
+| `npm run seed-all` | 一键初始化示例数据（内容/记忆/故事） |
 | `node scripts/gen_cert_numbers.js` | 批量生成校友证书编号 |
-| `node scripts/seed_whitelist.js` | 初始化校友名单（107 条） |
-| `node scripts/seed_memories.js` | 初始化燕中记忆种子数据 |
+| `node scripts/seed_whitelist.js` | 初始化校友名单 |
+| `node scripts/seed_memories.js` | 初始化燕中记忆数据 |
 | `node scripts/seed_content_sections.js` | 初始化页面内容数据 |
 | `node scripts/seed_stories.js` | 初始化燕中故事数据 |
 | `bash scripts/backup.sh` | 备份数据库 + 上传文件 |
-
-### 30 秒修改凭证
-
-```bash
-cp credentials.example.json credentials.local.json
-# 编辑 credentials.local.json 填写新值
-node scripts/set-credentials.js
-```
-
-脚本特性：原子写入防半写损坏、自动备份支持回滚、敏感文件已加入 `.gitignore`。修改后需重启服务。
 
 ## 数据模型
 
 | 模型 | 说明 | 主要字段 |
 | --- | --- | --- |
-| `User` | 用户 | name, contact, role(GUEST/ADMIN), status(PENDING/APPROVED) |
-| `WhitelistRoster` | 校友名单 | name, graduationClass, tags（大学\|专业\|城市）, certificateNo |
+| `User` | 用户 | username, passwordHash(bcrypt), email, name, graduationClass, className, role(GUEST/ALUMNI/ADMIN), status(PENDING/VERIFIED), accountStatus(ACTIVE/DISABLED), sessionVersion, emailVerified |
+| `WhitelistRoster` | 校友名单 | name, graduationClass, className, email, contact, tags（大学\|专业\|城市）, certificateNo |
+| `AuditLog` | 管理员审计日志 | action, targetType, targetId, adminId, before, after |
+| `UserClaimRequest` | 旧资料认领申请 | claimantUserId, oldUserId, description, status, reviewedById |
 | `News` | 新闻 | title, summary, content, imageUrl, status(DRAFT/PUBLISHED) |
 | `Event` | 活动 | title, summary, content, location, eventDate, maxAttendees, status |
 | `EventRegistration` | 活动报名 | eventId, name, contact, message |
@@ -225,35 +232,17 @@ node scripts/set-credentials.js
 | `ContentSection` | 页面内容块 | page(页面标识), title, description, note, icon, href, actionLabel, yearLabel, sortOrder |
 | `TeacherSection` | 教师频道版块 | title, description, note, icon, href, actionLabel, sortOrder |
 
-## 主要路由
+## 主要功能入口
 
-| 路由 | 权限 | 说明 |
+| 分类 | 路由 | 说明 |
 | --- | --- | --- |
-| `/` | 普通口令 | 首页 |
-| `/about` | 公开 | 学校介绍 |
-| `/news` | 公开 | 新闻列表 |
-| `/events` | 公开 | 活动列表 |
-| `/alumni/certificate` | 普通口令 | 电子校友纪念卡 |
-| `/alumni/university-map` | 普通口令 | 校友大学城市分布地图 |
-| `/alumni/memories` | 普通口令 | 燕中记忆文化长廊（数据库驱动） |
-| `/alumni/stories` | 普通口令 | 燕中故事（数据库驱动 + 邮箱投稿） |
-| `/alumni/achievements` | 普通口令 | 校友成就墙（类别筛选，仅展示已发布内容） |
-| `/alumni/correction` | 普通口令 | 校友信息修改申请 |
-| `/students` | 公开 | 在校生资源站（数据库驱动） |
-| `/teachers` | 公开 | 教师频道（数据库驱动） |
-| `/contact` | 公开 | 联系我们（数据库驱动） |
-| `/about` | 公开 | 学校介绍（数据库驱动） |
-| `/login` | 公开 | 普通用户与管理员共用登录页 |
-| `/admin` | 管理员 | 后台控制面板 |
-| `/admin/news` | 管理员 | 新闻管理 |
-| `/admin/events` | 管理员 | 活动管理（含报名名单） |
-| `/admin/memories` | 管理员 | 燕中记忆管理（CRUD/排序/上传） |
-| `/admin/stories` | 管理员 | 燕中故事管理（CRUD） |
-| `/admin/achievements` | 管理员 | 校友成就墙管理（CRUD/发布状态/排序） |
-| `/admin/teachers` | 管理员 | 教师频道管理 |
-| `/admin/content` | 管理员 | 页面内容管理（about/contact/students/teachers） |
+| **公开** | `/` `/about` `/news` `/events` `/contact` `/teachers` `/students/*` | 首页、学校介绍、新闻、活动、联系方式、教师频道、在校生资源站 |
+| **用户** | `/login` `/register` `/verify-email` `/reset-password` | 登录、注册、邮箱验证、密码重置 |
+| **个人中心** | `/me` `/me/edit` `/me/posts` `/me/change-password` | 个人资料、编辑、投稿、修改密码 |
+| **校友专区** | `/alumni/certificate` `/alumni/university-map` `/alumni/memories` `/alumni/stories` `/alumni/achievements` `/alumni/correction` | 电子校友卡、地图、记忆、故事、成就墙、信息修改 |
+| **管理员** | `/admin` `/admin/news` `/admin/events` `/admin/alumni` `/admin/users` `/admin/content` 等 18 个页面 | 后台管理（新闻、活动、校友名单、用户、内容等） |
 
-完整路由与 API 权限说明见 [docs/ROUTES.md](docs/ROUTES.md)。
+完整路由表与 API 权限说明见 [docs/ROUTES.md](docs/ROUTES.md)。
 
 ## 部署
 
@@ -272,8 +261,10 @@ node .next/standalone/server.js
 
 1. WSL 中执行 `npm run build` 生成 `deploy/` 目录
 2. 上传到服务器 `/var/www/alumni-site/app`
-3. 配置 systemd 服务、Nginx 反向代理、Let's Encrypt 证书
-4. 启动 `systemctl start alumni-site`
+3. 执行 `npx prisma db push` 同步数据库 schema
+4. 执行 `npm run create-admin` 创建管理员账号（首次部署）
+5. 配置 systemd 服务、Nginx 反向代理、Let's Encrypt 证书
+6. 启动 `systemctl start alumni-site`
 
 ### Docker 部署
 

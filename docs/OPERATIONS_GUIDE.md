@@ -31,8 +31,12 @@ Windows 本地开发使用 SQLite `prisma/dev.db`，所有数据变更可通过 
 
 | 变量名 | 用途 | 必填 |
 |--------|------|------|
-| `DATABASE_URL` | SQLite 数据库连接字符串（如 `file:./dev.db`） | 是 |
+| `DATABASE_URL` | SQLite 数据库连接字符串（如 `file:./prisma/dev.db`） | 是 |
 | `SESSION_SECRET` | HMAC-SHA256 token 签名密钥（随机字符串） | 是 |
+| `APP_URL` | 站点外部访问地址，用于邮件验证/密码重置链接 | 是 |
+| `RESEND_API_KEY` | Resend 邮件 API Key | 否（本地测试可跳过） |
+| `RESEND_FROM_EMAIL` | 发件人名称和邮箱（如 `燕中数字母港 <noreply@your.domain>`） | 否（本地测试可跳过） |
+| `REDIS_URL` | Redis 连接地址 | 否（未配置时降级为内存限流） |
 | `SITE_URL` | 站点根 URL（用于 Open Graph 等 SEO 标签） | 否 |
 | `SITE_NAME` | 站点名称（SEO） | 否 |
 
@@ -45,13 +49,27 @@ Windows 本地开发使用 SQLite `prisma/dev.db`，所有数据变更可通过 
 
 ## 3. 账号管理
 
-用户与管理员账号均存储在数据库 `User` 表中，密码使用 bcrypt 哈希。首次部署可运行：
+用户与管理员账号均存储在数据库 `User` 表中，密码使用 bcrypt 哈希。
+
+### 创建管理员
 
 ```bash
 npm run create-admin
 ```
 
-普通用户通过 `/register` 注册；管理员可在后台审核校友身份、停用账号或注销全部会话。
+脚本会交互式地要求输入用户名、邮箱和密码，创建已验证的管理员账号。
+
+### 用户注册
+
+普通用户通过 `/register` 注册，需要填写用户名、密码、邮箱、姓名、届别、班级。注册后需完成邮箱验证才能登录。
+
+### 校友自动匹配
+
+注册时如果姓名、届别、班级、邮箱四项与 `WhitelistRoster` 名册完全匹配，用户会自动获得校友认证（role=ALUMNI, status=VERIFIED），无需管理员审核。
+
+### 管理员后台管理
+
+管理员可在后台 `/admin/users` 审核校友身份、停用/恢复账号、强制注销全部会话、提升/撤销管理员权限。所有敏感操作记录到 AuditLog。
 
 ---
 
@@ -149,15 +167,19 @@ cp /var/www/alumni-site/data/prod.db "/var/www/alumni-site/backups/prod.db.$(dat
 | 脚本 | 用途 | 使用场景 |
 |------|------|----------|
 | `scripts/smoke-test.js` | 关键路径回归测试 | 部署前验证认证、后台流程是否正常 |
-| `scripts/create_admin.ts` | 创建数据库管理员账号 | 首次部署或新增管理员 |
-| `scripts/seed_content.js` | 种子内容数据 | 首次初始化或重置测试数据 |
-| `scripts/seed_whitelist.js` | 种子校友名单 | 填充初始校友数据 |
+| `npm run create-admin` | 创建数据库管理员账号（交互式） | 首次部署或新增管理员 |
+| `npm run migrate-users` | 旧用户数据迁移审查（生成 CSV） | 升级已有数据库时审查 |
+| `npm run seed-all` | 一键初始化示例数据 | 首次部署或重置数据 |
+| `scripts/seed_content_sections.js` | 页面内容种子数据 | 首次初始化或重置页面内容 |
+| `scripts/seed_whitelist.js` | 校友名单种子数据 | 填充初始校友名单 |
+| `scripts/seed_memories.js` | 燕中记忆种子数据 | 首次部署或重置记忆展品 |
+| `scripts/seed_stories.js` | 燕中故事种子数据 | 首次部署或重置故事数据 |
 | `scripts/rebuild_roster.js` | 重建校友名单 | 数据修复或迁移 |
+| `scripts/fix_timeline.js` | 修复时间线数据 | 时间线数据异常时修复 |
 | `scripts/sync_roster.js` | 同步校友名单 | 数据同步 |
 | `scripts/build_list.js` | 构建列表文件 | 生成静态数据文件 |
 | `scripts/clean.sh` | 清理构建产物 | 清除 `.next`、缓存等 |
 | `scripts/gen_cert_numbers.js` | 批量生成证书编号 | 新增校友后统一编号 |
-| `scripts/seed_memories.js` | 初始化燕中记忆种子数据 | 首次部署或重置记忆展品 |
 | `scripts/backup.sh` | 自动备份数据库与上传文件 | 配合 cron 定时执行 |
 
 ### 烟雾测试（smoke-test.js）
@@ -170,7 +192,7 @@ SMOKE_PASSWORD=yourpassword \
 node scripts/smoke-test.js
 ```
 
-测试覆盖：用户登录 → 管理员登录 → 后台 API 访问 → 校友数据 API 访问。
+测试覆盖：用户注册 → 邮箱验证 → 用户登录 → 管理员登录 → 后台 API 访问 → 校友数据 API 访问。
 
 ### 证书编号管理（gen_cert_numbers.js）
 
@@ -182,8 +204,8 @@ node scripts/gen_cert_numbers.js
 
 脚本逻辑：
 
-- 8 位核心成员（黄湘林、左佳维等）→ 编号置空，由管理员手动填写
-- 其余成员 → 按姓名排序生成 `YC-2022-0001` ~ `YC-2022-0096`
+- 部分核心成员的编号置空，由管理员在后台手动填写
+- 其余成员按姓名排序生成 `YC-2022-0001` 格式的编号
 
 两种方式修改编号：
 
@@ -195,7 +217,7 @@ node scripts/gen_cert_numbers.js
 燕中记忆文化长廊使用数据库驱动，通过后台 `/admin/memories` 可视化维护。
 
 ```bash
-# 初始化种子数据（6 条校园记忆展品）
+# 初始化种子数据
 node scripts/seed_memories.js
 ```
 
@@ -227,8 +249,11 @@ node scripts/seed_memories.js
 | 中文表头 | 英文表头 | 说明 |
 |----------|----------|------|
 | 姓名 | name | 必填 |
-| 届别 | graduationClass | 如"2022级3班" |
-| 标签 | tags | 格式：`大学名 \| 专业 \| 城市` |
+| 届别 | graduationClass | 如"2025"（毕业年份） |
+| 班级 | className | 如"3班" |
+| 邮箱 | email | 选填 |
+| 联系方式 | contact | 选填（11 位手机号） |
+| 标签 | tags | 格式：`大学名 | 专业 | 城市` |
 
 ### 6.3 标签格式
 
@@ -248,7 +273,7 @@ node scripts/seed_memories.js
 
 ### 6.4 导入去重
 
-按 `姓名 + 届别` 去重。同名且同届别的记录视为同一人，后导入的数据覆盖先前的数据。
+按 `姓名 + 届别 + 班级 + 邮箱` 四字段去重。完全匹配时更新现有记录，不新增重复项。
 
 ### 6.5 导出安全
 
@@ -314,10 +339,12 @@ sudo systemctl start alumni-site
 ## 9. 注意事项
 
 - **不要用本地 dev.db 覆盖线上 prod.db**
-- **不要提交** `.env`、`.env.local`、`.env.production`、`credentials.local.json`、`.claude/`、`dev.db` 到 git
+- **不要**提交 `.env`、`.env.local`、`.env.production`、`credentials.local.json`、`.claude/`、`*.db` 到 git
 - **不要在服务器上直接编辑业务代码**
 - **构建和部署必须**在 WSL 或 Linux 中执行（Windows 下 `next build` 不完全兼容）
 - **不要使用** `output: "export"` 静态部署（项目依赖 API 路由、数据库、上传等动态功能）
 - **所有** `/api/admin/*` 接口必须经过 `requireAdmin()` 保护
+- 认证 API 默认走限流（注册/登录/邮箱验证/密码重置等）
+- sessionVersion 在修改密码/停用账号/强制退出时递增，旧 token 立即失效
 - 修改凭据后**必须重启服务**才能生效
 - 直接操作生产数据库前**必须先备份**
