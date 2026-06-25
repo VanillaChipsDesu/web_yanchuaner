@@ -168,33 +168,42 @@ model Story                     # 燕中故事（title, author, tags, body, date
 aerospace-alumni-site/
 ├── src/
 │   ├── app/                          # Next.js App Router 页面与 API
-│   │   ├── page.tsx                  # 首页
-│   │   ├── about/                    # 学校介绍
-│   │   ├── news/                     # 新闻（列表 + 详情）
-│   │   ├── events/                   # 活动（列表 + 详情 + 报名）
-│   │   ├── contact/                  # 联系我们
-│   │   ├── teachers/                 # 教师频道
-│   │   ├── students/                 # 在校生资源站（首页 + 5 子页）
-│   │   ├── alumni/
-│   │   │   ├── certificate/          # 电子校友纪念卡
-│   │   │   ├── university-map/       # 校友大学城市分布地图
-│   │   │   ├── radar/                # 重定向 → university-map
-│   │   │   ├── memories/             # 校园记忆
-│   │   │   ├── stories/              # 燕中故事
-│   │   │   └── correction/           # 校友信息修改申请
-│   │   ├── admin/
-│   │   │   ├── page.tsx              # 后台控制面板
-│   │   │   ├── login/                # 管理员登录
-│   │   │   ├── news/                 # 新闻管理（列表 + 新建 + 编辑）
-│   │   │   ├── events/               # 活动管理（列表 + 新建 + 编辑 + 报名名单）
-│   │   │   ├── alumni/               # 校友名单管理
-│   │   │   ├── alumni-corrections/   # 修改申请审核
-│   │   │   ├── memories/             # 燕中记忆管理
-│   │   │   ├── stories/              # 燕中故事管理
-│   │   │   ├── teachers/             # 教师频道管理
-│   │   │   ├── content/              # 页面内容统一管理
-│   │   │   ├── posts/                # 投稿管理
-│   │   │   └── users/                # 用户管理
+│   │   ├── (front)/                  # 前台路由组（高空星空紫美学主题）
+│   │   │   ├── page.tsx              # 首页
+│   │   │   ├── about/                # 学校介绍
+│   │   │   ├── news/                 # 新闻（列表 + 详情）
+│   │   │   ├── events/               # 活动（列表 + 详情 + 报名）
+│   │   │   ├── contact/              # 联系我们
+│   │   │   ├── teachers/             # 教师频道
+│   │   │   ├── students/             # 在校生资源站（首页 + 5 子页）
+│   │   │   ├── alumni/
+│   │   │   │   ├── achievements/     # 校友成就墙（升学、科研、职业）
+│   │   │   │   ├── certificate/      # 电子校友纪念卡
+│   │   │   │   ├── university-map/   # 校友大学城市分布地图
+│   │   │   │   ├── radar/            # 重定向 → university-map
+│   │   │   │   ├── memories/         # 校园记忆
+│   │   │   │   ├── stories/          # 燕中故事
+│   │   │   │   └── correction/       # 校友信息修改申请
+│   │   │   ├── login/                # 统一登录页
+│   │   │   ├── register/             # 用户注册页
+│   │   │   ├── verify-email/         # 邮箱验证页
+│   │   │   ├── reset-password/       # 密码重置页
+│   │   │   └── me/                   # 个人中心
+│   │   ├── (admin)/                  # 管理员后台路由组
+│   │   │   └── admin/
+│   │   │       ├── page.tsx          # 后台控制面板
+│   │   │       ├── achievements/     # 校友成就墙管理
+│   │   │       ├── news/             # 新闻管理
+│   │   │       ├── events/           # 活动管理
+│   │   │       ├── alumni/           # 校友名单管理
+│   │   │       ├── alumni-corrections/ # 修改申请审核
+│   │   │       ├── memories/         # 燕中记忆管理
+│   │   │       ├── stories/          # 燕中故事管理
+│   │   │       ├── teachers/         # 教师频道管理
+│   │   │       ├── content/          # 页面内容统一管理
+│   │   │       ├── posts/            # 投稿管理
+│   │   │       ├── user-claims/      # 旧资料认领审核管理
+│   │   │       └── users/            # 用户管理
 │   │   └── api/                      # 40+ 个 API 端点
 │   ├── components/                   # 通用组件
 │   │   ├── ui/                        # UI 基础组件库（PageShell/GlassCard/PageHeader/Button/Badge/EmptyState/DisclaimerBanner/cn）

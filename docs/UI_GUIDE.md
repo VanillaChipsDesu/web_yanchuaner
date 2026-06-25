@@ -160,7 +160,7 @@ res.reload()             // 手动重新加载
 
 位置：`src/components/admin/CrudManager.tsx`。字段配置驱动，最适合「纯文本/下拉表单 + 列表」的页面。
 
-完整示例见 `src/app/admin/stories/page.tsx` 或 `src/app/admin/achievements/page.tsx`：
+完整示例见 `src/app/(admin)/admin/stories/page.tsx` 或 `src/app/(admin)/admin/achievements/page.tsx`：
 
 ```tsx
 const FIELDS: FieldConfig[] = [
@@ -192,12 +192,12 @@ export default function MyAdminPage() {
 `CrudManager` 表达不了，这时**只接入 `useResource` 数据层**，UI 自己写。
 
 参考实现：
-- `src/app/admin/memories/page.tsx` — 图片 16:9 上传 + 图标选择器 + 排序
-- `src/app/admin/content/page.tsx` — Tab 切换（`listQuery` 随 Tab 变化）
-- `src/app/admin/teachers/page.tsx` — 图标选择器 + 排序
+- `src/app/(admin)/admin/memories/page.tsx` — 图片 16:9 上传 + 图标选择器 + 排序
+- `src/app/(admin)/admin/content/page.tsx` — Tab 切换（`listQuery` 随 Tab 变化）
+- `src/app/(admin)/admin/teachers/page.tsx` — 图标选择器 + 排序
 
 这些页面用 `res.update(a.id, { sortOrder })` 实现排序、用 `/api/upload` 实现上传，
-**数据流仍由 `useResource` 统一托管**，架构保持一致。
+**数据流仍由 `useResource` 统一托管，架构保持一致。**
 
 ---
 
@@ -245,9 +245,9 @@ npx next lint        # 代码规范，必须零警告
 | 改全站主色 / 主题色 | `src/app/globals.css` 的 `:root`（同时改十六进制和 `*-rgb` 两处） |
 | 改卡片/按钮的统一外观 | `src/components/ui/GlassCard.tsx` / `Button.tsx` |
 | 改顶部导航的分组或菜单项 | `src/components/MobileNav.tsx` 的 `NAV_GROUPS` |
-| 改后台侧边栏分组 | `src/app/admin/layout.tsx` 的 `NAV_SECTIONS` |
+| 改后台侧边栏分组 | `src/app/(admin)/layout.tsx` 的 `NAV_SECTIONS` |
 | 改某个内容页的文案/布局 | 对应 `src/app/**/page.tsx` |
-| 新增一个后台 CRUD 页 | 仿照 `src/app/admin/stories/page.tsx`（useResource + CrudManager） |
+| 新增一个后台 CRUD 页 | 仿照 `src/app/(admin)/admin/stories/page.tsx`（useResource + CrudManager） |
 | 改某页的数据来源 | 找到对应 `/api/**`——但这是后端，**需与维护者确认** |
 
 ---

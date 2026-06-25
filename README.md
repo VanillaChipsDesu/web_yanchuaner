@@ -87,56 +87,46 @@
 ```text
 aerospace-alumni-site/
 ├── src/
-│   ├── app/                          # Next.js App Router
-│   │   ├── page.tsx                  # 首页
+│   ├── app/                          # Next.js App Router 页面与 API
+│   │   ├── (front)/                  # 前台路由组（高空星空紫美学主题）
+│   │   │   ├── page.tsx              # 首页
+│   │   │   ├── about/                # 学校介绍
+│   │   │   ├── news/                 # 新闻（列表 + 详情）
+│   │   │   ├── events/               # 活动（列表 + 详情 + 报名）
+│   │   │   ├── contact/              # 联系我们
+│   │   │   ├── teachers/             # 教师频道
+│   │   │   ├── students/             # 在校生资源站（首页 + 5 子页）
+│   │   │   ├── alumni/               # 校友专区（成就墙、证书、地图、记忆、故事等）
+│   │   │   ├── login/                # 统一登录页
+│   │   │   ├── register/             # 用户注册页
+│   │   │   ├── verify-email/         # 邮箱验证结果
+│   │   │   ├── reset-password/       # 密码重置页
+│   │   │   └── me/                   # 个人中心（资料/编辑/投稿/修改密码）
+│   │   ├── (admin)/                  # 管理员后台路由组
+│   │   │   └── admin/                # 后台管理面板（控制台及18个管理子模块，如成就墙、旧资料认领等）
+│   │   ├── api/                      # API 路由（40+ 个端点）
 │   │   ├── layout.tsx                # 根布局
-│   │   ├── globals.css               # 全局样式
-│   │   ├── login/                    # 统一登录页（普通用户 + 管理员）
-│   │   ├── register/                 # 用户注册页
-│   │   ├── verify-email/             # 邮箱验证页
-│   │   ├── reset-password/           # 密码重置页
-│   │   ├── me/                       # 个人中心（资料/编辑/投稿/改密码）
-│   │   ├── about/                    # 学校介绍
-│   │   ├── news/                     # 新闻列表/详情
-│   │   ├── events/                   # 活动列表/详情/报名
-│   │   ├── contact/                  # 联系我们
-│   │   ├── teachers/                 # 教师频道
-│   │   ├── students/                 # 在校生资源站（5 个子页）
-│   │   ├── alumni/                   # 校友相关（证书、地图、记忆、故事、修改申请）
-│   │   ├── admin/                    # 后台管理（含用户管理/认证审核/审计日志）
-│   │   └── api/                      # API 路由（40+ 个端点）
+│   │   └── globals.css               # 全局样式与设计令牌
 │   ├── components/                   # React 通用组件
-│   │   ├── ui/                        # UI 基础组件库（GlassCard/PageHeader/Button/Badge/EmptyState 等 + 设计令牌）
-│   │   ├── admin/                     # 后台通用组件（CrudManager/AdminPageShell/AdminBreadcrumb）
+│   │   ├── ui/                        # UI 基础组件库（PageShell/GlassCard/Button/Badge 等）
+│   │   ├── admin/                     # 后台通用组件（CrudManager/AdminPageShell）
 │   │   └── ...                        # 业务组件（地图、导航、弹窗等）
-│   ├── hooks/                        # 自定义 Hook（useResource：后台 CRUD 数据层）
-│   ├── data/                         # 静态数据（城市坐标、故事 JSON、种子数据）
-│   ├── lib/                          # 工具库
-│   │   ├── db.ts                     # Prisma 客户端
-│   │   ├── admin-auth.ts             # 管理员鉴权
-│   │   ├── verify-token.ts           # Token 验证
-│   │   ├── auth-utils.ts             # 认证工具函数
-│   │   ├── email.ts                  # Resend 邮件发送
-│   │   ├── roster.ts                 # 校友名单去重写入
-│   │   ├── cache.ts                  # 缓存（Redis/内存）
-│   │   ├── redis.ts                  # Redis 客户端
-│   │   ├── rate-limit.ts             # API 限流
-│   │   ├── image-pipeline.ts         # 图片处理管道（Sharp）
-│   │   ├── tags.ts                   # Tags 解析与标准化
-│   │   └── memories.ts               # 记忆板块文件重命名
-│   └── middleware.ts                 # 路由中间件（认证）
+│   ├── hooks/                        # 自定义 Hook（useResource：后台数据层）
+│   ├── data/                         # 静态与种子数据
+│   ├── lib/                          # 工具库（邮件、限流、Sharp管道、数据库客户端等）
+│   └── middleware.ts                 # 路由会话与权限控制中间件
 ├── prisma/
-│   └── schema.prisma                 # 数据模型定义
-├── prisma.config.ts                  # Prisma 7.x 数据源配置
-├── public/                           # 静态资源（图片、Leaflet 图标、上传文件）
-├── scripts/                          # 运维脚本
-├── docs/                             # 项目文档
+│   └── schema.prisma                 # 数据库 Schema 定义
+├── prisma.config.ts                  # Prisma 7.x 数据源连接配置
+├── public/                           # 静态资源（图标、默认背景、上传资产）
+├── scripts/                          # 运维脚本（备份、初始化、测试、管理员生成）
+├── docs/                             # 结构化架构设计与运维手册文档
 ├── .env.example                      # 环境变量模板
-├── Dockerfile                        # Docker 多阶段构建
-├── docker-compose.yml                # Docker Compose 编排
-├── next.config.mjs                   # Next.js 配置
-├── tailwind.config.ts                # Tailwind 配置
-└── package.json
+├── Dockerfile                        # Docker 多阶段部署构建文件
+├── docker-compose.yml                # Docker 部署容器编排
+├── next.config.mjs                   # Next.js 运行与打包配置
+├── tailwind.config.ts                # Tailwind CSS 响应式与语义令牌配置
+└── package.json                      # npm 运行脚本与依赖包管理
 ```
 
 ## 快速开始

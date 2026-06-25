@@ -103,6 +103,7 @@
 | `/api/events/[id]` | 公开 | GET | 活动详情 |
 | `/api/memories` | 公开 | GET | 燕中记忆展品列表（含图片存在性检查） |
 | `/api/stories` | 公开 | GET | 燕中故事列表 |
+| `/api/test-email` | 公开（仅开发调测） | POST | 测试邮件发送通道以确认 Resend API 联调状态 |
 
 ### 校友 API（需认证校友或管理员）
 
@@ -179,6 +180,12 @@
 | 发送密码重置邮件 | `send-reset-password` | 管理员代为触发重置邮件 |
 
 所有操作均记录到 AuditLog 表，与业务变更在同一事务中写入。
+
+> [!IMPORTANT]
+> **超级管理员 (Root Admin) 防越权机制**
+> - 超级管理员唯一邮箱标识：`yanchuaner@yanchuaner.cn`。
+> - 当执行 `disable-account`（停用）、`revoke-admin`（撤销管理员）、`reject-alumni`（撤销校友/驳回）和 `approve-alumni`（通过）这些敏感操作时，若目标账号角色已经是 `ADMIN`，系统会严格校验当前操作者是否为超级管理员本人。
+> - 非超级管理员（普通管理员）操作同行管理员会直接返回 `403 Forbidden`（提示："权限不足：普通管理员无法停用或撤销其他管理员"）。这防御了同级管理员之间的横向越权攻击。
 
 ---
 

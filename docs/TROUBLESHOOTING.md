@@ -319,6 +319,28 @@ DATABASE_URL="file:/var/www/alumni-site/data/prod.db" npx prisma db push
 systemctl restart alumni-site
 ```
 
+### 22. 邮件发送失败（如 Invalid from field 等 Resend API 异常）
+
+**现象**：
+- 用户注册时，显示提示：“账号已创建，但邮件发送失败，请稍后重新发送。”。
+- 控制台或服务端日志报错：
+  ```
+  Resend API 返回错误: {
+    statusCode: 422,
+    name: 'validation_error',
+    message: 'Invalid `from` field. The email address contains non-ASCII characters.'
+  }
+  ```
+
+**原因**：
+- 环境变量 `RESEND_FROM_EMAIL` 设置格式不规范（例如中文显示名称后没有使用 `<>` 包裹纯 ASCII 的邮箱地址）。若直接写成 `RESEND_FROM_EMAIL="燕中数字母港 noreply@yanchuaner.cn"`，Resend API 会因识别到非 ASCII 字符而拦截。
+
+**修复**：
+1. 打开配置的 `.env` 文件（本地开发环境或服务器生产环境的 `/var/www/alumni-site/.env`）。
+2. 确保 `RESEND_FROM_EMAIL` 符合标准邮件发件人规范，即显示名之后用 `<>` 括起纯英文邮箱：
+   `RESEND_FROM_EMAIL="燕中数字母港 <noreply@yanchuaner.cn>"`
+3. 重新启动服务使环境变量加载生效。
+
 ---
 
 ## 快速修复流程（万能方案）

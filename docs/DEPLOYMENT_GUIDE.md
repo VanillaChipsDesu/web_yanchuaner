@@ -180,6 +180,10 @@ APP_URL="https://yanchuaner.cn"
 SITE_URL="https://yanchuaner.cn"
 SITE_NAME="燕中校友数字母港"
 SESSION_SECRET="<随机32字节hex密钥>"
+# 生产邮件发信服务配置 (Resend API)
+RESEND_API_KEY="re_xxxxxxxxx"
+RESEND_FROM_EMAIL="燕中数字母港 <noreply@yanchuaner.cn>"
+# REDIS_URL="redis://localhost:6379"
 ENDOFFILE
 ```
 
@@ -193,9 +197,9 @@ curl -s -o /dev/null -w "%{http_code}" http://localhost:3000          # 200
 curl -s http://localhost:3000/api/health                               # healthy
 
 # 新页面产物检查（确认构建包含所有页面）
-ls /var/www/alumni-site/app/.next/server/app/admin/content.html && echo "✅ content"
-ls /var/www/alumni-site/app/.next/server/app/admin/stories.html && echo "✅ stories"
-ls /var/www/alumni-site/app/.next/server/app/admin/teachers.html && echo "✅ teachers"
+ls /var/www/alumni-site/app/.next/server/app/\(admin\)/admin/content.html && echo "✅ content"
+ls /var/www/alumni-site/app/.next/server/app/\(admin\)/admin/stories.html && echo "✅ stories"
+ls /var/www/alumni-site/app/.next/server/app/\(admin\)/admin/teachers.html && echo "✅ teachers"
 
 # 日志
 journalctl -u alumni-site -n 20 --no-pager

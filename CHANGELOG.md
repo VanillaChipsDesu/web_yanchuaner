@@ -5,6 +5,19 @@
 ## [Unreleased]
 
 ### Added
+- 生产环境对接真实 Resend 邮件发送 API，实现验证邮件与重置密码的完整业务闭环
+- 新增后台用户认领/认证旧校友资料模块（`user-claims`）与校友成就墙（`achievements`）管理与展示
+- 引入超级管理员 (Root Admin) 唯一邮箱识别（`yanchuaner@yanchuaner.cn`），构建同级越权防护与自停用防御机制
+
+### Changed
+- 管理后台路由结构重构：全部页面和 API 按 Next.js Route Groups 划归为前台 `(front)` 与后台 `(admin)` 进行分租隔离
+- 全局 UI 响应式断点优化：降低 Navbar 桌面端折叠断点阈值，避免 125% 缩放过早触发汉堡菜单
+- 邮箱验证结果页面 (`/verify-email`) UI 改版：移除违和的白色背景框与实线边框，融入高空星空紫美学深邃感，引入柔和磨砂玻璃卡片与微交互动画
+- 后台用户操作列（UserTable）重构：分离普通管理员与 Root 超管控制，支持管理员降级与撤销操作，屏蔽对同级/自账号的破坏性操作以防横向越权
+- 升级 `docs` 体系文档以匹配最新的路由组架构与超管权限控制逻辑
+
+### Fixed
+- 修复移动端导航抽屉的浅色 Overlay 遮罩“白雾”问题，改为与暗黑星空主题深度咬合的深色透明微遮罩
 - 通用页面内容管理模型 `ContentSection`：一个模型驱动 about(特色卡片+时间线)、contact、students、teachers 所有页面内容
 - 燕中故事数据库驱动改造：新增 `Story` 模型，后台 CRUD 管理页 `/admin/stories`，公开 API `GET /api/stories`
 - 管理员统一内容管理页 `/admin/content`（Tab 切换 about/contact/students/teachers 页面内容）
