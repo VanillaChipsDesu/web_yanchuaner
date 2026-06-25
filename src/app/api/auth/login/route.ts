@@ -3,17 +3,19 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { normalizeUsername, readJsonBody } from "@/lib/auth-utils";
 import { AUTH_COOKIE } from "@/lib/admin-auth";
-import { getClientIp, rateLimit } from "@/lib/rate-limit";
+import { getClientIp, authLimiter } from "@/lib/rate-limit";
 import { signToken, TOKEN_TTL_SECONDS } from "@/lib/verify-token";
 
 type LoginBody = { username?: unknown; password?: unknown };
 
 export async function POST(req: NextRequest) {
-  const limit = await rateLimit(`login:${getClientIp(req)}`, 10, 60_000);
-  if (!limit.ok) {
+  // 使用 Upstash Redis 滑动窗口限流（5次/分钟），无 Redis 时自动降级为内存限流
+  // TODO: 生产环境请配置 UPSTASH_REDIS_REST_URL 和 UPSTASH_REDIS_REST_TOKEN 环境变量
+  const limiterResult = await authLimiter.limit(getClientIp(req));
+  if (!limiterResult.success) {
     return NextResponse.json(
       { error: "尝试过于频繁，请稍后再试" },
-      { status: 429, headers: { "Retry-After": String(limit.retryAfter) } },
+      { status: 429, headers: { "Retry-After": String(limiterResult.retryAfter) } },
     );
   }
   try {

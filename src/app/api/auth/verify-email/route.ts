@@ -1,15 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
-import { hashToken } from "@/lib/auth-utils";
-import { getClientIp, rateLimit } from "@/lib/rate-limit";
+import { hashToken, readJsonBody } from "@/lib/auth-utils";
+import { getClientIp, emailLimiter } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
-  const limit = await rateLimit(`verify-email:${getClientIp(req)}`, 20, 60_000);
-  if (!limit.ok) {
-    return NextResponse.json({ error: "请求过于频繁" }, { status: 429 });
+  // 使用 Upstash Redis 对邀请验证接口限流（1次/分钟，单日10次），无 Redis 时自动降级为内存限流
+  // TODO: 生产环境请配置 UPSTASH_REDIS_REST_URL 和 UPSTASH_REDIS_REST_TOKEN 环境变量
+  const limiterResult = await emailLimiter.limit(getClientIp(req));
+  if (!limiterResult.success) {
+    return NextResponse.json({ error: "请求过于频繁" }, { status: 429, headers: { "Retry-After": String(limiterResult.retryAfter) } });
   }
   try {
-    const body = (await req.json()) as { token?: unknown };
+    const body = await readJsonBody<{ token?: unknown }>(req, 4096);
     const token = typeof body.token === "string" ? body.token : "";
     if (!token || token.length > 256) {
       return NextResponse.json({ error: "验证链接无效" }, { status: 400 });

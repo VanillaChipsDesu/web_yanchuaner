@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error('Stats error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch stats', pendingUsers: 0, pendingPosts: 0, totalAlumni: 0 },
+      { error: '获取统计数据失败', pendingUsers: 0, pendingPosts: 0, totalAlumni: 0 },
       { status: 500 },
     );
   }

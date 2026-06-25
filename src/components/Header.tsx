@@ -15,7 +15,7 @@ export default function Header() {
         visible ? "translate-y-0" : "-translate-y-full"
       )}
     >
-      <div className="mx-auto flex h-[68px] max-w-[1320px] items-center justify-between px-5 md:px-8 xl:px-10">
+      <div className="mx-auto flex h-[68px] max-w-[1320px] items-center justify-between px-5 md:px-8 lg:px-10">
         <Link
           href="/"
           aria-label="返回首页：燕中数字母港"

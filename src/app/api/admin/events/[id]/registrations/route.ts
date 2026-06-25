@@ -28,6 +28,7 @@ export async function GET(
     const registrations = await prisma.eventRegistration.findMany({
       where: { eventId: params.id },
       orderBy: { createdAt: "desc" },
+      take: 300, // 防御大量数据导致 OOM
     });
 
     return NextResponse.json({

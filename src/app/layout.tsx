@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
+import { Toaster } from "sonner";
 import UUIDCompat from "@/components/UUIDCompat";
 import AuthProvider from "@/components/AuthProvider";
-import Header from "@/components/Header";
 import { InteractiveStarfield } from "@/components/ui";
 import "./globals.css";
 
@@ -89,35 +89,31 @@ export default function RootLayout({
                 <InteractiveStarfield />
                 <div className="meteor-layer absolute inset-0 opacity-[0.10]" />
               </div>
-            {/* 导航栏 */}
-            <Header />
-
-            <main id="main" className="relative z-20">{children}</main>
-
-            {/* 页脚 */}
-            <footer className="glass relative z-10 border-t border-[#7C3AED]/10">
-              <div className="mx-auto max-w-6xl px-4 py-5 md:px-8">
-                <div className="flex flex-col items-center justify-between gap-2 text-sm text-[#7C3AED]/70 md:flex-row">
-                  <p>
-                    © 2025-2026 燕中校友数字母港（个人公益版）
-                  </p>
-                  <p>{"声明：个人公益、非官方、无盈利"}</p>
-                </div>
-                <div className="mt-2 flex justify-center">
-                  <a
-                    href="https://beian.miit.gov.cn/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="访问工信部备案系统"
-                    tabIndex={0}
-                    className="text-xs text-[#7C3AED]/40 transition hover:text-[#7C3AED]/60 focus:outline-none focus:ring-2 focus:ring-[#7C3AED] focus:ring-offset-2 focus:ring-offset-[#FAF5FF] cursor-pointer transition-all duration-300"
-                  >
-                    {"粤ICP备2026024784号-2"}
-                  </a>
-                </div>
-              </div>
-            </footer>
+              
+              {children}
           </div>
+          {/* 星空紫主题 Toast 通知 */}
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              style: {
+                background: "rgba(15, 10, 29, 0.85)",
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
+                border: "1px solid rgba(168, 85, 247, 0.30)",
+                color: "#e9d5ff",
+                borderRadius: "12px",
+                boxShadow: "0 8px 32px rgba(124, 58, 237, 0.20), 0 0 0 1px rgba(168,85,247,0.10)",
+                fontSize: "14px",
+              },
+              classNames: {
+                title: "text-purple-100 font-semibold",
+                description: "text-purple-300/80 text-xs mt-0.5",
+                actionButton: "bg-purple-600 text-white hover:bg-purple-500",
+                cancelButton: "bg-purple-900/50 text-purple-200",
+              },
+            }}
+          />
         </AuthProvider>
       </body>
     </html>

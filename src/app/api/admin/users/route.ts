@@ -8,8 +8,13 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const status = searchParams.get('status');
-    const limit = Math.min(parseInt(searchParams.get('limit') || '50', 10), 200);
-    const offset = parseInt(searchParams.get('offset') || '0', 10);
+
+    // 强校验分页参数，防御 NaN / 负数
+    const rawLimit = parseInt(searchParams.get('limit') || '50', 10);
+    const limit = Number.isInteger(rawLimit) && rawLimit > 0 ? Math.min(rawLimit, 200) : 50;
+
+    const rawOffset = parseInt(searchParams.get('offset') || '0', 10);
+    const offset = Number.isInteger(rawOffset) && rawOffset >= 0 ? rawOffset : 0;
 
     const where = status && status !== 'ALL' ? { status } : {};
 
@@ -41,7 +46,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ users, total, limit, offset });
   } catch (error) {
     console.error('Admin users GET error:', error);
-    return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 });
+    return NextResponse.json({ error: '获取用户列表失败' }, { status: 500 });
   }
 }
 

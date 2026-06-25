@@ -47,7 +47,12 @@ export async function POST(
   }
   try {
     const body = await readJsonBody<{ action?: unknown }>(req, 4096);
-    const action = body.action as ActionName;
+    const action = typeof body.action === "string" ? (body.action.trim() as ActionName) : null;
+
+    if (!action) {
+      return NextResponse.json({ error: "操作不能为空" }, { status: 400 });
+    }
+
     const audited = new Set<ActionName>([
       "approve-alumni",
       "reject-alumni",
@@ -57,6 +62,7 @@ export async function POST(
       "grant-admin",
       "revoke-admin",
     ]);
+
     if (
       !audited.has(action) &&
       action !== "resend-verification" &&
@@ -64,8 +70,27 @@ export async function POST(
     ) {
       return NextResponse.json({ error: "不支持的操作" }, { status: 400 });
     }
+
     const target = await prisma.user.findUnique({ where: { id: params.id } });
     if (!target) return NextResponse.json({ error: "用户不存在" }, { status: 404 });
+
+    // Root Admin 防线：普通管理员（ADMIN）之间不能互相“停用”或“撤销”对方的权限
+    const ROOT_ADMIN_EMAIL = "yanchuaner@yanchuaner.cn";
+    const isRoot = admin.email === ROOT_ADMIN_EMAIL;
+    if (target.role === "ADMIN" && target.id !== admin.id && !isRoot) {
+      if (
+        action === "disable-account" ||
+        action === "revoke-admin" ||
+        action === "reject-alumni" ||
+        action === "approve-alumni"
+      ) {
+        return NextResponse.json(
+          { error: "权限不足：普通管理员无法停用或撤销其他管理员" },
+          { status: 403 }
+        );
+      }
+    }
+
     if (
       target.id === admin.id &&
       (action === "disable-account" || action === "revoke-admin")
@@ -100,6 +125,7 @@ export async function POST(
       );
       return NextResponse.json({ success: true, emailSent });
     }
+
     if (action === "send-reset-password") {
       if (!target.email) {
         return NextResponse.json({ success: true, emailSent: false });
@@ -158,7 +184,14 @@ export async function POST(
       return result;
     });
     return NextResponse.json({ user: updated });
-  } catch {
+  } catch (error: any) {
+    console.error("Admin users action error:", error);
+    if (error?.message === "PAYLOAD_TOO_LARGE") {
+      return NextResponse.json({ error: "请求体过大" }, { status: 413 });
+    }
+    if (error instanceof SyntaxError) {
+      return NextResponse.json({ error: "无效的 JSON 数据" }, { status: 400 });
+    }
     return NextResponse.json({ error: "操作失败" }, { status: 500 });
   }
 }

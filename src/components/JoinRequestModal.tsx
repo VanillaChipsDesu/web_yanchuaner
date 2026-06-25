@@ -284,13 +284,13 @@ export function JoinTriggerButton() {
       href="/register"
       aria-label="打开入轨联络舱注册页面"
       tabIndex={0}
-      className="cosmic-card group flex min-h-[168px] flex-col items-center justify-center rounded-card border border-brand/25 bg-surface/55 px-5 py-6 text-center backdrop-blur-md shadow-[0_0_15px_rgba(124,58,237,0.3)] transition duration-300 hover:-translate-y-0.5 hover:scale-[1.02] hover:border-brand/50 hover:shadow-[0_0_24px_rgba(124,58,237,0.35)]"
+      className="group flex min-h-[168px] flex-col items-center justify-center rounded-card border border-purple-500/30 bg-[#0f0a1d]/60 backdrop-blur-lg px-5 py-6 text-center shadow-[0_0_20px_rgba(168,85,247,0.1)] transition-all duration-300 hover:-translate-y-0.5 hover:scale-[1.02] hover:bg-white/10 hover:border-purple-400/60 hover:shadow-[0_0_25px_rgba(168,85,247,0.2)]"
     >
-      <span className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-brand/10 text-brand shadow-[0_0_20px_rgba(124,58,237,0.25)] transition group-hover:shadow-[0_0_28px_rgba(124,58,237,0.4)]">
+      <span className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-purple-500/15 text-purple-300 shadow-[0_0_20px_rgba(168,85,247,0.15)] transition-all duration-300 group-hover:bg-purple-500/25 group-hover:text-purple-200 group-hover:shadow-[0_0_28px_rgba(168,85,247,0.3)]">
         <Send size={24} />
       </span>
-      <p className="mt-4 text-base font-semibold text-brand-fg font-heading">入轨联络舱</p>
-      <p className="mt-1 text-xs text-brand-fg/60">注册校友账号，加入数字母港</p>
+      <p className="mt-4 text-base font-semibold text-gray-100 font-heading">入轨联络舱</p>
+      <p className="mt-1 text-xs text-purple-300/80">注册校友账号，加入数字母港</p>
     </Link>
   );
 }

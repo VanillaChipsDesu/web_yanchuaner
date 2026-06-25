@@ -2,11 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { requireVerifiedAlumni } from "@/lib/admin-auth";
 
-export async function GET(req: NextRequest) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   const auth = await requireVerifiedAlumni(req);
   if (auth) return auth;
   try {
-    const id = req.url.split("/").pop();
+    const id = params.id;
     if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
 
     const article = await prisma.news.findFirst({

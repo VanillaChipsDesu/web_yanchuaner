@@ -9,6 +9,14 @@ export async function GET(req: NextRequest) {
   if (auth) return auth;
   try {
     const stories = await prisma.story.findMany({
+      select: {
+        id: true,
+        title: true,
+        author: true,
+        tags: true,
+        body: true,
+        date: true,
+      },
       orderBy: { date: 'desc' },
     });
     const data = stories.map((s) => ({

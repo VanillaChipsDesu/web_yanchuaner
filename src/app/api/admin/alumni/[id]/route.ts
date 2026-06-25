@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { requireAdmin } from "@/lib/admin-auth";
 import { normalizeTags } from "@/lib/tags";
+import { readJsonBody } from "@/lib/auth-utils";
 
 export async function GET(
   req: NextRequest,
@@ -21,7 +22,7 @@ export async function GET(
   } catch (error) {
     console.error("Admin alumni GET by id error:", error);
     return NextResponse.json(
-      { error: "Failed to fetch alumni" },
+      { error: "获取校友信息失败" },
       { status: 500 },
     );
   }
@@ -42,14 +43,23 @@ export async function PUT(
       return NextResponse.json({ error: "校友不存在" }, { status: 404 });
     }
 
-    const body = await req.json();
-    const name = (body.name || "").trim();
-    const graduationClass = (body.graduationClass || "").trim() || null;
-    const className = (body.className || "").trim() || null;
-    const email = (body.email || "").trim().toLowerCase() || null;
-    const contact = (body.contact || "").trim() || null;
-    const tags = normalizeTags((body.tags || "").trim()) || null;
-    const certificateNo = (body.certificateNo || "").trim() || null;
+    const body = await readJsonBody<{
+      name?: unknown;
+      graduationClass?: unknown;
+      className?: unknown;
+      email?: unknown;
+      contact?: unknown;
+      tags?: unknown;
+      certificateNo?: unknown;
+    }>(req, 16384); // Roster forms are small, 16KB limit
+
+    const name = typeof body.name === "string" ? body.name.trim() : "";
+    const graduationClass = typeof body.graduationClass === "string" ? body.graduationClass.trim() : "";
+    const className = typeof body.className === "string" ? body.className.trim() : "";
+    const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
+    const contact = typeof body.contact === "string" ? body.contact.trim() : "";
+    const tags = typeof body.tags === "string" ? normalizeTags(body.tags.trim()) : "";
+    const certificateNo = typeof body.certificateNo === "string" ? body.certificateNo.trim() : "";
 
     if (!name || name.length > 50) {
       return NextResponse.json(
@@ -81,25 +91,37 @@ export async function PUT(
         { status: 400 },
       );
     }
+    if (certificateNo && certificateNo.length > 50) {
+      return NextResponse.json(
+        { error: "证书编号长度不超过50字" },
+        { status: 400 },
+      );
+    }
 
     const alumni = await prisma.whitelistRoster.update({
       where: { id: params.id },
       data: {
         name,
-        graduationClass,
-        className,
-        email,
-        contact,
-        tags,
-        certificateNo,
+        graduationClass: graduationClass || null,
+        className: className || null,
+        email: email || null,
+        contact: contact || null,
+        tags: tags || null,
+        certificateNo: certificateNo || null,
       },
     });
 
     return NextResponse.json({ alumni });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Admin alumni PUT error:", error);
+    if (error?.message === "PAYLOAD_TOO_LARGE") {
+      return NextResponse.json({ error: "请求体过大" }, { status: 413 });
+    }
+    if (error instanceof SyntaxError) {
+      return NextResponse.json({ error: "无效的 JSON 数据" }, { status: 400 });
+    }
     return NextResponse.json(
-      { error: "Failed to update alumni" },
+      { error: "更新校友失败" },
       { status: 500 },
     );
   }
@@ -139,7 +161,7 @@ export async function DELETE(
   } catch (error) {
     console.error("Admin alumni DELETE error:", error);
     return NextResponse.json(
-      { error: "Failed to delete alumni" },
+      { error: "删除校友失败" },
       { status: 500 },
     );
   }

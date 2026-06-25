@@ -25,6 +25,12 @@ export async function GET(req: NextRequest) {
           { graduationClass: { contains: q } },
         ],
       },
+      select: {
+        id: true,
+        name: true,
+        graduationClass: true,
+        tags: true,
+      },
       take: 20,
       orderBy: { name: 'asc' },
     });

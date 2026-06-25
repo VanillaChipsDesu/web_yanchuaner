@@ -3,6 +3,7 @@ import prisma from "@/lib/db";
 import { requireAdmin } from "@/lib/admin-auth";
 import { normalizeTags } from "@/lib/tags";
 import { upsertRosterEntry } from "@/lib/roster";
+import { readJsonBody } from "@/lib/auth-utils";
 
 export async function GET(req: NextRequest) {
   const auth = await requireAdmin(req);
@@ -14,11 +15,13 @@ export async function GET(req: NextRequest) {
     const graduationClass = (
       searchParams.get("graduationClass") || ""
     ).trim();
-    const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
-    const pageSize = Math.min(
-      200,
-      Math.max(1, parseInt(searchParams.get("pageSize") || "50", 10)),
-    );
+
+    // 强校验分页参数，防御 NaN / 负数导致的 Prisma 崩溃
+    const rawPage = parseInt(searchParams.get("page") || "1", 10);
+    const page = Number.isInteger(rawPage) && rawPage > 0 ? rawPage : 1;
+
+    const rawPageSize = parseInt(searchParams.get("pageSize") || "50", 10);
+    const pageSize = Number.isInteger(rawPageSize) && rawPageSize > 0 ? Math.min(200, rawPageSize) : 50;
 
     const where: Record<string, unknown> = {};
     const andConditions: Record<string, unknown>[] = [];
@@ -55,7 +58,7 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error("Admin alumni GET error:", error);
     return NextResponse.json(
-      { error: "Failed to fetch alumni" },
+      { error: "获取校友花名册失败" },
       { status: 500 },
     );
   }
@@ -66,14 +69,23 @@ export async function POST(req: NextRequest) {
   if (auth) return auth;
 
   try {
-    const body = await req.json();
-    const name = (body.name || "").trim();
-    const graduationClass = (body.graduationClass || "").trim() || null;
-    const className = (body.className || "").trim() || null;
-    const email = (body.email || "").trim().toLowerCase() || null;
-    const contact = (body.contact || "").trim() || null;
-    const tags = normalizeTags((body.tags || "").trim()) || null;
-    const certificateNo = (body.certificateNo || "").trim() || null;
+    const body = await readJsonBody<{
+      name?: unknown;
+      graduationClass?: unknown;
+      className?: unknown;
+      email?: unknown;
+      contact?: unknown;
+      tags?: unknown;
+      certificateNo?: unknown;
+    }>(req, 16384); // 16KB limit
+
+    const name = typeof body.name === "string" ? body.name.trim() : "";
+    const graduationClass = typeof body.graduationClass === "string" ? body.graduationClass.trim() : "";
+    const className = typeof body.className === "string" ? body.className.trim() : "";
+    const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
+    const contact = typeof body.contact === "string" ? body.contact.trim() : "";
+    const tags = typeof body.tags === "string" ? normalizeTags(body.tags.trim()) : "";
+    const certificateNo = typeof body.certificateNo === "string" ? body.certificateNo.trim() : "";
 
     if (!name || name.length > 50) {
       return NextResponse.json(
@@ -105,6 +117,12 @@ export async function POST(req: NextRequest) {
         { status: 400 },
       );
     }
+    if (certificateNo && certificateNo.length > 50) {
+      return NextResponse.json(
+        { error: "证书编号长度不超过50字" },
+        { status: 400 },
+      );
+    }
 
     const { entry: alumni, created } = await upsertRosterEntry(prisma, {
       name,
@@ -120,10 +138,16 @@ export async function POST(req: NextRequest) {
       { alumni, created },
       { status: created ? 201 : 200 },
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error("Admin alumni POST error:", error);
+    if (error?.message === "PAYLOAD_TOO_LARGE") {
+      return NextResponse.json({ error: "请求体过大" }, { status: 413 });
+    }
+    if (error instanceof SyntaxError) {
+      return NextResponse.json({ error: "无效的 JSON 数据" }, { status: 400 });
+    }
     return NextResponse.json(
-      { error: "Failed to create alumni" },
+      { error: "添加校友记录失败" },
       { status: 500 },
     );
   }

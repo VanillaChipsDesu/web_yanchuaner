@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { requireAdmin } from "@/lib/admin-auth";
+import { readJsonBody } from "@/lib/auth-utils";
 
 export async function GET(
   req: NextRequest,
@@ -20,7 +21,7 @@ export async function GET(
     return NextResponse.json({ event });
   } catch (error) {
     console.error("Admin events GET error:", error);
-    return NextResponse.json({ error: "获取活动失败" }, { status: 500 });
+    return NextResponse.json({ error: "获取活动详情失败" }, { status: 500 });
   }
 }
 
@@ -37,14 +38,48 @@ export async function PUT(
       return NextResponse.json({ error: "活动不存在" }, { status: 404 });
     }
 
-    const body = await req.json();
-    const { title, summary, content, location, eventDate, endDate, coverImage, maxAttendees, status } = body;
+    const body = await readJsonBody<{
+      title?: unknown;
+      summary?: unknown;
+      content?: unknown;
+      location?: unknown;
+      eventDate?: unknown;
+      endDate?: unknown;
+      coverImage?: unknown;
+      maxAttendees?: unknown;
+      status?: unknown;
+    }>(req, 524288); // 512KB limit (contains long text)
 
-    if (!title || !title.trim()) {
+    const title = typeof body.title === "string" ? body.title.trim() : "";
+    const summary = typeof body.summary === "string" ? body.summary.trim() : "";
+    const content = typeof body.content === "string" ? body.content.trim() : "";
+    const location = typeof body.location === "string" ? body.location.trim() : "";
+    const coverImage = typeof body.coverImage === "string" ? body.coverImage.trim() : "";
+    const status = typeof body.status === "string" ? body.status.trim() : "";
+    const eventDate = typeof body.eventDate === "string" ? body.eventDate.trim() : "";
+    const endDate = typeof body.endDate === "string" ? body.endDate.trim() : "";
+    const maxAttendees = body.maxAttendees;
+
+    if (!title) {
       return NextResponse.json({ error: "标题不能为空" }, { status: 400 });
     }
-    if (!content || !content.trim()) {
+    if (title.length > 100) {
+      return NextResponse.json({ error: "标题长度不超过100字" }, { status: 400 });
+    }
+    if (summary.length > 500) {
+      return NextResponse.json({ error: "摘要长度不超过500字" }, { status: 400 });
+    }
+    if (!content) {
       return NextResponse.json({ error: "正文不能为空" }, { status: 400 });
+    }
+    if (content.length > 10000) {
+      return NextResponse.json({ error: "正文长度不超过10000字" }, { status: 400 });
+    }
+    if (location.length > 200) {
+      return NextResponse.json({ error: "地址长度不超过200字" }, { status: 400 });
+    }
+    if (coverImage.length > 254) {
+      return NextResponse.json({ error: "封面链接长度不超过254字" }, { status: 400 });
     }
     if (status && !["DRAFT", "PUBLISHED"].includes(status)) {
       return NextResponse.json({ error: "无效的状态值" }, { status: 400 });
@@ -78,21 +113,27 @@ export async function PUT(
     const event = await prisma.event.update({
       where: { id: params.id },
       data: {
-        title: title.trim(),
-        summary: summary?.trim() || null,
-        content: content.trim(),
-        location: location?.trim() || null,
+        title,
+        summary: summary || null,
+        content,
+        location: location || null,
         eventDate: parsedEventDate,
         endDate: parsedEndDate,
-        coverImage: coverImage?.trim() || null,
+        coverImage: coverImage || null,
         maxAttendees: parsedMax,
         status: status || existing.status,
       },
     });
 
     return NextResponse.json({ event });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Admin events PUT error:", error);
+    if (error?.message === "PAYLOAD_TOO_LARGE") {
+      return NextResponse.json({ error: "请求体过大" }, { status: 413 });
+    }
+    if (error instanceof SyntaxError) {
+      return NextResponse.json({ error: "无效的 JSON 数据" }, { status: 400 });
+    }
     return NextResponse.json({ error: "更新活动失败" }, { status: 500 });
   }
 }

@@ -854,3 +854,159 @@ body::after {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(167, 139, 250, 0.5);
 }
+
+/* ==========================================================================
+   6. 宇宙科幻暗色模式精细化覆盖器 (Cosmic Theme Fine-grained Overrides)
+   自动适配全站前后台硬编码的浅色背景、灰色边框、带有透明度的旧版文字，实现 100% 视觉统合
+   ========================================================================== */
+
+/* 6.1 劫持硬编码的浅色背景与半透明色块 */
+.bg-gray-50,
+.bg-gray-100,
+.bg-slate-50,
+.bg-slate-100,
+.bg-white\/50,
+.bg-white\/40,
+.bg-white\/30 {
+  background-color: rgba(13, 9, 36, 0.5) !important;
+}
+
+.bg-white,
+.bg-surface {
+  background-color: var(--color-surface) !important;
+}
+
+/* 6.2 劫持硬编码的浅灰色边框 */
+.border-gray-100,
+.border-gray-200,
+.border-gray-300,
+.border-slate-100,
+.border-slate-200,
+.border-slate-300 {
+  border-color: var(--color-line) !important;
+}
+
+/* 6.3 劫持旧版深色文本（包括带有 Tailwind 透明度修饰符的变体） */
+.text-\[\#4C1D95\],
+.text-\[\#4C1D95\]\/90,
+.text-\[\#4C1D95\]\/80,
+.text-\[\#4C1D95\]\/70,
+.text-\[\#4C1D95\]\/60,
+.text-\[\#4C1D95\]\/50,
+.text-\[\#4C1D95\]\/40,
+.text-\[\#4C1D95\]\/30 {
+  color: rgba(245, 243, 255, 0.95) !important;
+}
+
+/* 6.4 劫持品牌文本变体与背景变体 */
+.text-\[\#7C3AED\],
+.text-\[\#7C3AED\]\/70,
+.text-\[\#7C3AED\]\/60,
+.text-\[\#7C3AED\]\/50 {
+  color: var(--color-primary) !important;
+}
+
+.bg-\[\#7C3AED\]\/10 {
+  background-color: rgba(167, 139, 250, 0.15) !important;
+}
+.bg-\[\#7C3AED\]\/5 {
+  background-color: rgba(167, 139, 250, 0.08) !important;
+}
+.bg-\[\#4C1D95\]\/20 {
+  background-color: rgba(167, 139, 250, 0.18) !important;
+}
+
+
+/* 6.5 劫持硬编码的浅色状态标签 (PENDING / VERIFIED / REJECTED) */
+/* Amber / PENDING / 待审核 */
+.bg-amber-50,
+.bg-amber-100\/50,
+.bg-amber-100 {
+  background-color: rgba(245, 158, 11, 0.1) !important;
+}
+.border-amber-200,
+.border-amber-300 {
+  border-color: rgba(245, 158, 11, 0.25) !important;
+}
+.text-amber-700,
+.text-amber-800,
+.text-amber-600 {
+  color: #fbbf24 !important;
+}
+
+/* Emerald / VERIFIED / 已认证 */
+.bg-emerald-50,
+.bg-emerald-100\/50,
+.bg-emerald-100 {
+  background-color: rgba(16, 185, 129, 0.1) !important;
+}
+.border-emerald-200,
+.border-emerald-300 {
+  border-color: rgba(16, 185, 129, 0.25) !important;
+}
+.text-emerald-700,
+.text-emerald-800,
+.text-emerald-600 {
+  color: #34d399 !important;
+}
+
+/* Rose / REJECTED / 已驳回 */
+.bg-rose-50,
+.bg-rose-100\/50,
+.bg-rose-100 {
+  background-color: rgba(244, 63, 94, 0.1) !important;
+}
+.border-rose-200,
+.border-rose-300 {
+  border-color: rgba(244, 63, 94, 0.25) !important;
+}
+.text-rose-700,
+.text-rose-800,
+.text-rose-600 {
+  color: #fb7185 !important;
+}
+
+/* Violet / Brand / 提升角色 */
+.bg-violet-50,
+.bg-violet-100\/50,
+.bg-violet-100 {
+  background-color: rgba(139, 92, 246, 0.1) !important;
+}
+.border-violet-200,
+.border-violet-300 {
+  border-color: rgba(139, 92, 246, 0.25) !important;
+}
+.text-violet-700,
+.text-violet-800,
+.text-violet-600 {
+  color: #a78bfa !important;
+}
+
+/* 6.6 提高灰度级文字的可读性与对比度 */
+.text-gray-400,
+.text-slate-400 {
+  color: rgba(245, 243, 255, 0.45) !important;
+}
+.text-gray-500,
+.text-slate-500 {
+  color: rgba(245, 243, 255, 0.6) !important;
+}
+.text-gray-600,
+.text-slate-600 {
+  color: rgba(245, 243, 255, 0.75) !important;
+}
+.text-gray-700,
+.text-slate-700 {
+  color: rgba(245, 243, 255, 0.85) !important;
+}
+
+/* 6.7 解决硬编码的浅色 Hover 态 */
+.hover\:bg-\[\#FAF5FF\]:hover,
+.hover\:bg-white\/90:hover {
+  background-color: rgba(167, 139, 250, 0.15) !important;
+}
+
+/* 6.8 地图圆点霓虹发光 (Leaflet Neon Marker drop shadow) */
+.leaflet-neon-marker {
+  filter: drop-shadow(0 0 8px rgba(167, 139, 250, 0.8)) !important;
+}

@@ -29,6 +29,16 @@ export function renameToCategoryPath(
   if (!oldImagePath || !oldImagePath.startsWith('/uploads/')) return oldImagePath;
 
   const oldFilename = oldImagePath.replace('/uploads/', '');
+
+  // 防止路径穿越攻击 (Path Traversal)
+  if (
+    oldFilename.includes('..') ||
+    oldFilename.includes('/') ||
+    oldFilename.includes('\\')
+  ) {
+    return oldImagePath;
+  }
+
   const extMatch = oldFilename.match(/\.(jpg|jpeg|png|webp|gif)$/i);
   const ext = extMatch ? extMatch[1].toLowerCase() : 'jpg';
 
@@ -38,6 +48,12 @@ export function renameToCategoryPath(
   const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
   const oldPath = path.join(uploadsDir, oldFilename);
   const newPath = path.join(uploadsDir, newFilename);
+
+  // 再次绝对路径核对，确保旧文件在 uploadsDir 内部
+  const resolvedOldPath = path.resolve(oldPath);
+  if (!resolvedOldPath.startsWith(uploadsDir)) {
+    return oldImagePath;
+  }
 
   // 如果新旧路径相同，无需操作
   if (oldPath === newPath) return `/uploads/${newFilename}`;
@@ -57,3 +73,4 @@ export function renameToCategoryPath(
 
   return oldImagePath;
 }
+

@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { requireVerifiedAlumni } from "@/lib/admin-auth";
+import { readJsonBody } from "@/lib/auth-utils";
 
-export async function GET(req: NextRequest) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   const auth = await requireVerifiedAlumni(req);
   if (auth) return auth;
   try {
-    const id = req.url.split("/").pop();
+    const id = params.id;
     if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
 
     const event = await prisma.event.findFirst({
@@ -32,7 +33,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   const auth = await requireVerifiedAlumni(req);
   if (auth) return auth;
   // 限流：每 30 秒 3 次
@@ -43,13 +44,22 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const id = req.url.split("/").pop();
+    const id = params.id;
     if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
 
-    const body = await req.json();
+    const body = await readJsonBody<any>(req, 4096);
     const { name, contact, message } = body;
 
-    if (!name) return NextResponse.json({ error: "Name is required" }, { status: 400 });
+    if (typeof name !== 'string' || !name.trim()) {
+      return NextResponse.json({ error: "Name is required and must be a string" }, { status: 400 });
+    }
+    const safeName = name.trim();
+    const safeContact = typeof contact === 'string' ? contact.trim() : null;
+    const safeMessage = typeof message === 'string' ? message.trim() : null;
+
+    if (safeName.length > 50 || (safeContact && safeContact.length > 100) || (safeMessage && safeMessage.length > 500)) {
+       return NextResponse.json({ error: "Input too long" }, { status: 400 });
+    }
 
     const event = await prisma.event.findFirst({ where: { id, status: "PUBLISHED" } });
     if (!event) return NextResponse.json({ error: "Event not found" }, { status: 404 });
@@ -63,7 +73,7 @@ export async function POST(req: NextRequest) {
         }
       }
       return tx.eventRegistration.create({
-        data: { eventId: id, name: name.trim(), contact: contact?.trim() || null, message: message?.trim() || null },
+        data: { eventId: id, name: safeName, contact: safeContact, message: safeMessage },
       });
     });
 

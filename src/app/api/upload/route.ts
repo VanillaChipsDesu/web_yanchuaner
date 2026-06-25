@@ -14,21 +14,21 @@ export async function POST(req: NextRequest) {
     const file = formData.get('file') as File | null;
 
     if (!file) {
-      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
+      return NextResponse.json({ error: '未提供上传文件' }, { status: 400 });
     }
 
     if (!ALLOWED_TYPES.includes(file.type)) {
-      return NextResponse.json({ error: 'Invalid file type. Allowed: jpeg, png, webp' }, { status: 400 });
+      return NextResponse.json({ error: '无效的文件类型。仅支持 jpeg, png, webp' }, { status: 400 });
     }
 
     if (file.size > MAX_UPLOAD_BYTES) {
-      return NextResponse.json({ error: `File too large. Maximum ${MAX_UPLOAD_BYTES / 1024 / 1024}MB` }, { status: 400 });
+      return NextResponse.json({ error: `文件过大。允许的最大尺寸为 ${MAX_UPLOAD_BYTES / 1024 / 1024}MB` }, { status: 400 });
     }
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // 生成可读文件名：时间戳-原始文件名
+    // 生成可读文件名：时间戳-安全的文件名
     const rawName = (file as any).name?.replace(/[^a-zA-Z0-9._\-一-鿿]/g, '_').replace(/_{2,}/g, '_') || 'upload';
     const baseName = rawName.replace(/\.[^.]+$/, '');
     const filename = `${Date.now()}-${baseName}.jpg`; // 16:9 裁剪后始终输出 jpeg
@@ -45,6 +45,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ url, filename }, { status: 201 });
   } catch (error) {
     console.error('Upload error:', error);
-    return NextResponse.json({ error: 'Upload failed' }, { status: 500 });
+    return NextResponse.json({ error: '图片上传失败' }, { status: 500 });
   }
 }

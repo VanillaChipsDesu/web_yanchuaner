@@ -167,7 +167,7 @@ export default function MobileNav() {
       {/* ── 桌面端：Mega Menu 下拉 + CTA ───────────────── */}
       <nav
         ref={navRef}
-        className="ml-8 hidden flex-1 items-center justify-end gap-1 xl:flex"
+        className="ml-8 hidden flex-1 items-center justify-end gap-1 lg:flex"
         role="navigation"
         aria-label="主导航"
       >
@@ -273,7 +273,7 @@ export default function MobileNav() {
         aria-label={open ? '关闭导航菜单' : '打开导航菜单'}
         aria-expanded={open ? 'true' : 'false'}
         aria-controls="mobile-drawer"
-        className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-brand/30 bg-brand/10 text-brand xl:hidden cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-surface-muted"
+        className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-brand/30 bg-brand/10 text-brand lg:hidden cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-surface-muted"
       >
         {open ? <X size={20} aria-hidden="true" /> : <Menu size={20} aria-hidden="true" />}
       </button>
@@ -282,7 +282,7 @@ export default function MobileNav() {
       {open && mounted && createPortal(
         <>
           <div
-            className="fixed inset-0 z-[60] bg-brand-fg/30 backdrop-blur-sm xl:hidden"
+            className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm lg:hidden"
             onClick={() => setOpen(false)}
             aria-hidden="true"
           />
@@ -292,7 +292,7 @@ export default function MobileNav() {
             role="dialog"
             aria-modal="true"
             aria-label="导航菜单"
-            className="fixed right-0 top-0 z-[60] flex h-full w-80 max-w-[88vw] flex-col border-l border-brand/15 bg-surface/95 p-5 backdrop-blur-xl shadow-2xl xl:hidden"
+            className="fixed right-0 top-0 z-[60] flex h-full w-80 max-w-[88vw] flex-col border-l border-brand/15 bg-surface/95 p-5 backdrop-blur-xl shadow-2xl lg:hidden"
           >
             <div className="mb-4 flex items-center justify-between">
               <p className="text-sm font-semibold text-brand font-heading">导航菜单</p>

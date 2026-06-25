@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { rateLimit, getClientIp } from '@/lib/rate-limit';
 import { getAuthenticatedUser } from '@/lib/admin-auth';
+import { readJsonBody } from '@/lib/auth-utils';
 
 export async function POST(req: NextRequest) {
   const user = await getAuthenticatedUser(req);
@@ -20,11 +21,22 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const body = await req.json();
+    const body = await readJsonBody<any>(req, 65536);
     const { title, content, type } = body;
 
-    if (!title || !content) {
+    if (typeof title !== 'string' || typeof content !== 'string') {
+      return NextResponse.json({ error: 'Title and content must be strings' }, { status: 400 });
+    }
+
+    const safeTitle = title.trim();
+    const safeContent = content.trim();
+
+    if (!safeTitle || !safeContent) {
       return NextResponse.json({ error: 'Title and content are required' }, { status: 400 });
+    }
+
+    if (safeTitle.length > 200 || safeContent.length > 20000) {
+      return NextResponse.json({ error: 'Content too long' }, { status: 400 });
     }
 
     const validTypes = ['STORY', 'EVENT', 'JOB'];
@@ -32,8 +44,8 @@ export async function POST(req: NextRequest) {
 
     const post = await prisma.post.create({
       data: {
-        title: title.trim(),
-        content: content.trim(),
+        title: safeTitle,
+        content: safeContent,
         type: postType,
         status: 'PENDING',
         authorId: user.id,

@@ -7,6 +7,14 @@ export async function GET(req: NextRequest) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const posts = await prisma.post.findMany({
     where: { authorId: user.id },
+    select: {
+      id: true,
+      title: true,
+      content: true,
+      type: true,
+      status: true,
+      createdAt: true,
+    },
     orderBy: { createdAt: "desc" },
   });
   return NextResponse.json({ posts });

@@ -46,9 +46,10 @@ export async function readJsonBody<T>(
 ): Promise<T> {
   const length = Number(req.headers.get("content-length") || "0");
   if (length > maxBytes) throw new Error("PAYLOAD_TOO_LARGE");
-  const text = await req.text();
-  if (Buffer.byteLength(text, "utf8") > maxBytes) {
+  const buffer = await req.arrayBuffer();
+  if (buffer.byteLength > maxBytes) {
     throw new Error("PAYLOAD_TOO_LARGE");
   }
+  const text = new TextDecoder().decode(buffer);
   return JSON.parse(text) as T;
 }

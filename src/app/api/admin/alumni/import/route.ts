@@ -91,6 +91,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "请上传 CSV 文件" }, { status: 400 });
     }
 
+    // 防御大体积文件攻击 (DoS)
+    if (file.size > 2 * 1024 * 1024) {
+      return NextResponse.json({ error: "文件过大，请保持在 2MB 以内" }, { status: 400 });
+    }
+
     const raw = new TextDecoder("utf-8").decode(
       new Uint8Array(await file.arrayBuffer()),
     );
@@ -123,64 +128,66 @@ export async function POST(req: NextRequest) {
     let imported = 0;
     let skipped = 0;
 
-    for (let i = 1; i < lines.length; i++) {
-      if (errors.length >= 20) {
-        errors.push(`已达错误上限，第 ${i + 1} 行及之后已跳过`);
-        break;
-      }
-      try {
-        const fields = parseCSVLine(lines[i]);
-        const name = (fields[nameIdx] || "").trim();
-        if (!name) {
-          skipped++;
-          continue;
+    await prisma.$transaction(async (tx) => {
+      for (let i = 1; i < lines.length; i++) {
+        if (errors.length >= 20) {
+          errors.push(`已达错误上限，第 ${i + 1} 行及之后已跳过`);
+          break;
         }
-        const graduationClass =
-          graduationClassIdx >= 0
-            ? (fields[graduationClassIdx] || "").trim() || null
-            : null;
-        const className =
-          classNameIdx >= 0 ? (fields[classNameIdx] || "").trim() || null : null;
-        const email =
-          emailIdx >= 0
-            ? (fields[emailIdx] || "").trim().toLowerCase() || null
-            : null;
-        const rawTags =
-          tagsIdx >= 0 ? (fields[tagsIdx] || "").trim() || null : null;
-        const tags = rawTags ? normalizeTags(rawTags) : null;
+        try {
+          const fields = parseCSVLine(lines[i]);
+          const name = (fields[nameIdx] || "").trim();
+          if (!name) {
+            skipped++;
+            continue;
+          }
+          const graduationClass =
+            graduationClassIdx >= 0
+              ? (fields[graduationClassIdx] || "").trim() || null
+              : null;
+          const className =
+            classNameIdx >= 0 ? (fields[classNameIdx] || "").trim() || null : null;
+          const email =
+            emailIdx >= 0
+              ? (fields[emailIdx] || "").trim().toLowerCase() || null
+              : null;
+          const rawTags =
+            tagsIdx >= 0 ? (fields[tagsIdx] || "").trim() || null : null;
+          const tags = rawTags ? normalizeTags(rawTags) : null;
 
-        if (name.length > 50) {
-          errors.push(`第 ${i + 1} 行：姓名过长`);
-          skipped++;
-          continue;
-        }
-        if (
-          (graduationClass && graduationClass.length > 50) ||
-          (className && className.length > 64) ||
-          (email && (email.length > 254 || !email.includes("@")))
-        ) {
-          errors.push(`第 ${i + 1} 行：届别、班级或邮箱格式无效`);
-          skipped++;
-          continue;
-        }
+          if (name.length > 50) {
+            errors.push(`第 ${i + 1} 行：姓名过长`);
+            skipped++;
+            continue;
+          }
+          if (
+            (graduationClass && graduationClass.length > 50) ||
+            (className && className.length > 64) ||
+            (email && (email.length > 254 || !email.includes("@")))
+          ) {
+            errors.push(`第 ${i + 1} 行：届别、班级或邮箱格式无效`);
+            skipped++;
+            continue;
+          }
 
-        const { created } = await upsertRosterEntry(prisma, {
-          name,
-          graduationClass,
-          className,
-          email,
-          tags,
-        });
-        if (!created) {
+          const { created } = await upsertRosterEntry(tx, {
+            name,
+            graduationClass,
+            className,
+            email,
+            tags,
+          });
+          if (!created) {
+            skipped++;
+            continue;
+          }
+          imported++;
+        } catch {
+          errors.push(`第 ${i + 1} 行：解析失败`);
           skipped++;
-          continue;
         }
-        imported++;
-      } catch {
-        errors.push(`第 ${i + 1} 行：解析失败`);
-        skipped++;
       }
-    }
+    });
 
     return NextResponse.json({
       imported,
